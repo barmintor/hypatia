@@ -1,4 +1,4 @@
-require 'spec/rake/spectask'
+require 'rspec/core/rake_task'
 require "cucumber/rake/task"
 
 # number of seconds to pause after issuing commands to return a git repos to its pristine state (e.g. make jetty squeaky clean)
@@ -36,11 +36,9 @@ namespace :hypatia do
   desc "Run the hypatia specs.  Must have jetty already running and fixtures loaded."
   Spec::Rake::SpecTask.new(:spec) do |t|
 #     t.spec_opts = ['--options', "/spec/spec.opts"]
-    t.spec_files = FileList['spec/**/*_spec.rb']
+    t.pattern = 'spec/**/*_spec.rb'
     t.rcov = true
-    t.rcov_opts = lambda do
-      IO.readlines("spec/rcov.opts").map {|l| l.chomp.split " "}.flatten
-    end
+    t.rcov_opts = IO.readlines("spec/rcov.opts").map {|l| l.chomp.split " "}.flatten
   end
 
 
@@ -163,11 +161,11 @@ namespace :hypatia do
     namespace :test do 
       desc "Recreate test databases from scratch"
       task :reset do 
-        old_env = RAILS_ENV # just in case
-        RAILS_ENV = "test"
+        old_env = Rails.env # just in case
+        Rails.env = "test"
         Rake::Task['db:drop'].invoke
         Rake::Task['db:migrate'].invoke
-        RAILS_ENV = old_env  # be safe
+        Rails.env = old_env  # be safe
       end
     end
   end

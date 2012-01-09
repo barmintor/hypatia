@@ -2,9 +2,10 @@
 # from the project root directory.
 ENV["RAILS_ENV"] ||= 'test'
 require File.expand_path(File.join(File.dirname(__FILE__),'..','config','environment'))
-require 'spec/autorun'
-require 'spec/rails'
+require 'rspec/autorun'
+require 'rspec/rails'
 
+Dir[File.expand_path(File.join(File.dirname(__FILE__),'..','lib','**','*.rb'))].each {|f| require f}
 # Uncomment the next line to use webrat's matchers
 #require 'webrat/integrations/rspec-rails'
 
@@ -12,13 +13,13 @@ require 'spec/rails'
 # in ./support/ and its subdirectories.
 Dir[File.expand_path(File.join(File.dirname(__FILE__),'support','**','*.rb'))].each {|f| require f}
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   # If you're not using ActiveRecord you should remove these
   # lines, delete config/database.yml and disable :active_record
   # in your config/boot.rb
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures  = false
-  config.fixture_path = RAILS_ROOT + '/spec/fixtures/'
+  config.fixture_path = Rails.root.to_s + '/spec/fixtures/'
 
   # == Fixtures
   #
@@ -91,7 +92,8 @@ Spec::Runner.configure do |config|
   def import_fixture(pid)
     filename = File.join(File.dirname(__FILE__), "/fixtures/#{pid.gsub(":","_")}.foxml.xml")    
     file = File.new(filename, "r")
-    result = Fedora::Repository.instance.ingest(file.read)
+    repo = ActiveFedora::RubydoraConnection.instance
+    result = repo.connection.ingest(:pid=>pid, :file=>file.read)
     if result
       if !pid.nil?
         solrizer = Solrizer::Fedora::Solrizer.new 
@@ -112,4 +114,11 @@ Spec::Runner.configure do |config|
     end
   end
   
+  def confirm_datastreams(obj, expected_dsids)
+    actual = obj.datastreams.keys
+    expected_dsids.each do |dsid|
+      actual.delete(dsid).should eql(dsid)
+    end
+    actual.length.should eql(0)
+  end
 end

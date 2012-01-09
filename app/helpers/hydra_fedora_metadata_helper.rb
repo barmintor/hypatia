@@ -1,5 +1,5 @@
-require 'vendor/plugins/hydra-head/app/helpers/hydra_fedora_metadata_helper.rb'
 module HydraFedoraMetadataHelper
+  include Hydra::HydraFedoraMetadataHelperBehavior
   # just testing out if we can easily add a :disabled option
   def fedora_text_field(resource, datastream_name, field_key, opts={})
     field_name = field_name_for(field_key)

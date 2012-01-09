@@ -1,12 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-
+require 'pathname'
 describe FtkDiskImageItemAssembler do
   before(:all) do 
     # defining simple constants
     @collection_pid = "hypatia:fixture_coll2"
-    @disk_image_files_dir = File.join(File.dirname(__FILE__), "/../fixtures/ftk/disk_images")
-    @computer_media_photos_dir = File.join(File.dirname(__FILE__), "/../fixtures/ftk/computer_media_photos")
-    @txt_file = File.join(@disk_image_files_dir, "/CM5551212.001.txt")
+    @disk_image_files_dir = Pathname.new(File.join(File.dirname(__FILE__), "/../fixtures/ftk/disk_images")).realpath.to_s
+    @computer_media_photos_dir = Pathname.new(File.join(File.dirname(__FILE__), "/../fixtures/ftk/computer_media_photos")).realpath.to_s
+    @txt_file = Pathname.new(File.join(@disk_image_files_dir, "/CM5551212.001.txt")).realpath.to_s
   end
   context "basic behavior" do
     before(:all) do
@@ -83,32 +83,35 @@ describe FtkDiskImageItemAssembler do
       delete_fixture(@collection_pid)
       import_fixture(@collection_pid)
       @assembler = FtkDiskImageItemAssembler.new(:collection_pid => @collection_pid, :disk_image_files_dir => @disk_image_files_dir, :computer_media_photos_dir => @computer_media_photos_dir)
-      disk_image_item = HypatiaDiskImageItem.new
-      @disk_image_full_pid = disk_image_item.internal_uri
+      @disk_image_item = HypatiaDiskImageItem.new
+      @disk_image_item.save # lazy init of pid
+      @disk_image_full_pid = @disk_image_item.internal_uri
       @fdi = FtkDiskImage.new(@txt_file)
-      @dd_file_asset = @assembler.create_dd_file_asset(disk_image_item, @fdi)
+      @dd_file_asset = @assembler.create_dd_file_asset(@disk_image_item, @fdi)
+      @dd_file_asset.datastreams["DC"] # lazy init of DC
       dd_file_ds_name = @dd_file_asset.datastreams.keys.select {|k| k !~ /(DC|RELS\-EXT|descMetadata)/}.first
       @dd_file_ds = @dd_file_asset.datastreams[dd_file_ds_name]
-      @photo_file_asset_array = @assembler.create_photo_file_assets(disk_image_item, @fdi)
+      @photo_file_asset_array = @assembler.create_photo_file_assets(@disk_image_item, @fdi)
     end
     after(:all) do
       @photo_file_asset_array.each { |pfa|  
         pfa.delete
       }
       @dd_file_asset.delete
+      @disk_image_item.delete
       delete_fixture(@collection_pid)
     end
     context "with FTK .txt file" do
       it "creates the correct FileAsset object for disk image itself" do
         @dd_file_asset.should be_instance_of(FileAsset) # model
-        @dd_file_asset.relationships[:self][:is_part_of].should == ["#{@disk_image_full_pid}"]
+        @dd_file_asset.relationships(:is_part_of).should == ["#{@disk_image_full_pid}"]
 
         # DC, RELS-EXT, descMetadata, (the datastream the file is stored in)
         @dd_file_asset.datastreams.size.should == 4
 
         # file datastream:
-        @dd_file_ds[:dsLabel].should == "CM5551212" # from Evidence Number : line of FTK .txt file -- the file name
-        @dd_file_ds[:mimeType].should == "application/octet-stream"
+        @dd_file_ds.dsLabel.should == "CM5551212" # from Evidence Number : line of FTK .txt file -- the file name
+        @dd_file_ds.mimeType.should == "application/octet-stream"
         
         # descMetadata:
         desc_md_ds_fields_hash = @dd_file_asset.datastreams["descMetadata"].fields
@@ -125,16 +128,16 @@ describe FtkDiskImageItemAssembler do
         
         @photo_file_asset_array.each { | file_asset |  
           file_asset.should be_instance_of(FileAsset) # model
-          file_asset.relationships[:self][:is_part_of].should == ["#{@disk_image_full_pid}"]
-
+          file_asset.relationships(:is_part_of).should == ["#{@disk_image_full_pid}"]
+          file_asset.datastreams["DC"] # lazy init of DC
           # DC, RELS-EXT, descMetadata, (the datastream the file is stored in)
           file_asset.datastreams.size.should == 4
 
           # datastream containing the photo file
           file_ds_name = file_asset.datastreams.keys.select {|k| k !~ /(DC|RELS\-EXT|descMetadata)/}.first
           file_ds = file_asset.datastreams[file_ds_name]
-          file_ds[:dsLabel].should match(/^CM5551212(_1|_2)?\.JPG$/)  # the file name of the image (xxx.jpeg, whatever)
-          file_ds.mime_type.should == "image/jpeg"
+          file_ds.dsLabel.should match(/^CM5551212(_1|_2)?\.JPG$/)  # the file name of the image (xxx.jpeg, whatever)
+          file_ds.mimeType.should == "image/jpeg"
 
           # descMetadata:
           desc_md_ds_fields_hash = file_asset.datastreams["descMetadata"].fields
@@ -158,10 +161,10 @@ describe FtkDiskImageItemAssembler do
         it "creates the correct resource element for the disk image FileAsset" do
           @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/@objectId").to_s.should eql(@dd_file_asset.pid)
           # id attribute on resource element is just a unique identifier
-          @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/@id").to_s.should eql(@dd_file_ds[:dsLabel])
+          @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/@id").to_s.should eql(@dd_file_ds.dsLabel)
           @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/@id").to_s.should eql("CM5551212")
           # id attribute on file element must match the label of the datastream in the FileAsset object
-          @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/file/@id").to_s.should eql(@dd_file_ds[:dsLabel])
+          @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/file/@id").to_s.should eql(@dd_file_ds.dsLabel)
           @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/file/@id").to_s.should eql("CM5551212")
           @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/file/@format").to_s.should eql("BINARY")
           @doc_one_image.xpath("/contentMetadata/resource[@type='media-file']/file/@mimetype").to_s.should eql("application/octet-stream")
@@ -180,10 +183,10 @@ describe FtkDiskImageItemAssembler do
           image_ds = image_file_asset.datastreams[ds_name]
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/@objectId").to_s.should eql(image_file_asset.pid)
           # id attribute on resource element is just a unique identifier
-          @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/@id").to_s.should eql(image_ds[:dsLabel])
+          @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/@id").to_s.should eql(image_ds.dsLabel)
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/@id").to_s.should eql("CM5551212.JPG")
           # id attribute on file element must match the label of the datastream in the FileAsset object
-          @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/@id").to_s.should eql(image_ds[:dsLabel])
+          @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/@id").to_s.should eql(image_ds.dsLabel)
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/@id").to_s.should eql("CM5551212.JPG")
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/@format").to_s.should eql("JPG")
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/@mimetype").to_s.should eql("image/jpeg")
@@ -194,7 +197,7 @@ describe FtkDiskImageItemAssembler do
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/location/@type").to_s.should eql("datastreamID")
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/location/text()").to_s.should eql(image_ds.dsid)
           @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/checksum[@type='md5']/text()").to_s.should eql("812b53258f21ee250d17c9308d2099d9")
-          @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/checksum[@type='sha1']/text()").to_s.should eql("da39a3ee5e6b4b0d3255bfef95601890afd80709")
+          @doc_one_image.xpath("/contentMetadata/resource[@type='image-front']/file/checksum[@type='sha1']/text()").to_s.should eql("0688a526ef77bd4312622b99db87062f706eed8d")
         end
         it "creates the correct resource elements for two photo image FileAsset objects" do
           doc_two_images = Nokogiri::XML(@assembler.build_content_metadata(@fdi, "dii_pid", @dd_file_asset, @photo_file_asset_array[1..2]))
@@ -204,10 +207,10 @@ describe FtkDiskImageItemAssembler do
           doc_two_images.xpath("/contentMetadata/resource").size.should eql(3)
           doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/@objectId").to_s.should eql(image_file_asset1.pid)
           # id attribute on resource element is just a unique identifier
-          doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/@id").to_s.should eql(image_ds1[:dsLabel])
+          doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/@id").to_s.should eql(image_ds1.dsLabel)
           doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/@id").to_s.should eql("CM5551212_1.JPG")
           # id attribute on file element must match the label of the datastream in the FileAsset object
-          doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/file/@id").to_s.should eql(image_ds1[:dsLabel])
+          doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/file/@id").to_s.should eql(image_ds1.dsLabel)
           doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/file/@id").to_s.should eql("CM5551212_1.JPG")
           doc_two_images.xpath("/contentMetadata/resource[@type='image-front']/file/location/text()").to_s.should eql(image_ds1.dsid)
           image_file_asset2 = @photo_file_asset_array[2]
@@ -215,10 +218,10 @@ describe FtkDiskImageItemAssembler do
           image_ds2 = image_file_asset2.datastreams[ds_name2]
           doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/@objectId").to_s.should eql(image_file_asset2.pid)
           # id attribute on resource element is just a unique identifier
-          doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/@id").to_s.should eql(image_ds2[:dsLabel])
+          doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/@id").to_s.should eql(image_ds2.dsLabel)
           doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/@id").to_s.should eql("CM5551212_2.JPG")
           # id attribute on file element must match the label of the datastream in the FileAsset object
-          doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/file/@id").to_s.should eql(image_ds2[:dsLabel])
+          doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/file/@id").to_s.should eql(image_ds2.dsLabel)
           doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/file/@id").to_s.should eql("CM5551212_2.JPG")
           doc_two_images.xpath("/contentMetadata/resource[@type='image-back']/file/location/text()").to_s.should eql(image_ds2.dsid)
         end
@@ -244,10 +247,10 @@ describe FtkDiskImageItemAssembler do
           addl_image_ds = addl_image_file_asset.datastreams[ds_name]
           doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/@objectId").to_s.should eql(addl_image_file_asset.pid)
           # id attribute on resource element is just a unique identifier
-          doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/@id").to_s.should eql(addl_image_ds[:dsLabel])
+          doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/@id").to_s.should eql(addl_image_ds.dsLabel)
           doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/@id").to_s.should eql("CM5551212_2.JPG")
           # id attribute on file element must match the label of the datastream in the FileAsset object
-          doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/file/@id").to_s.should eql(addl_image_ds[:dsLabel])
+          doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/file/@id").to_s.should eql(addl_image_ds.dsLabel)
           doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/file/@id").to_s.should eql("CM5551212_2.JPG")
           doc_three_images.xpath("/contentMetadata/resource[@type='image-other1']/file/location/text()").to_s.should eql(addl_image_ds.dsid)
         end
@@ -268,7 +271,7 @@ describe FtkDiskImageItemAssembler do
           content_md_ds.term_values(:image_front_size).first.should match(/^\d+$/)
           content_md_ds.term_values(:image_front_mimetype).should == ["image/jpeg"]
           content_md_ds.term_values(:image_front_md5).should == ["812b53258f21ee250d17c9308d2099d9"]
-          content_md_ds.term_values(:image_front_sha1).should == ["da39a3ee5e6b4b0d3255bfef95601890afd80709"]
+          content_md_ds.term_values(:image_front_sha1).should == ["0688a526ef77bd4312622b99db87062f706eed8d"]
         end
         it "does not raise 'undefined method `label' for nil:NilClass' exception when non-Xanadu collection" do
           disk_image_item = HypatiaDiskImageItem.new
@@ -301,7 +304,7 @@ describe FtkDiskImageItemAssembler do
       @disk_image_item.should be_kind_of(HypatiaDiskImageItem)
     end
     it "has isMemberOfCollection relationship with the collection object" do
-      @disk_image_item.relationships[:self][:is_member_of_collection].first.gsub("info:fedora/",'').should eql(@collection_pid)
+      @disk_image_item.relationships(:is_member_of_collection).first.gsub("info:fedora/",'').should eql(@collection_pid)
     end
     it "has correct descMetadata" do
       desc_md_ds = @disk_image_item.datastreams["descMetadata"]
@@ -331,7 +334,7 @@ describe FtkDiskImageItemAssembler do
         file_ds_name = part.datastreams.keys.select {|k| k !~ /(DC|RELS\-EXT|descMetadata)/}.first
         file_ds = part.datastreams[file_ds_name]
         # the (file) datastream of a FileAsset part object should have a label value = filename
-        file_ds[:dsLabel].should match(/^CM555121|(CM5551212(_1|_2)?\.JPG)$/)
+        file_ds.dsLabel.should match(/^CM555121|(CM5551212(_1|_2)?\.JPG)$/)
       }
     end
   end # context "build_object method"

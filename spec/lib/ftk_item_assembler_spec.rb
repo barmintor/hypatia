@@ -77,37 +77,45 @@ describe FtkItemAssembler do
         ff_intermed.disk_image_name = "single_match"
         ftk_item_object = HypatiaFtkItem.new
         @assembler.link_to_parent(ftk_item_object, ff_intermed)
-        ftk_item_object.relationships[:self][:is_member_of].size.should be(1)
-        ftk_item_object.relationships[:self][:is_member_of].first.should eql("info:fedora/#{@disk_objects.first.pid}")
+        ftk_item_object.relationships(:is_member_of).size.should be(1)
+        ftk_item_object.relationships(:is_member_of).first.should eql("info:fedora/#{@disk_objects.first.pid}")
       end
       it "disambiguates multiple matches with the collection pid" do
         ff_intermed = FactoryGirl.build(:ftk_file)
         ff_intermed.disk_image_name = "mult_match"
         ftk_item_object = HypatiaFtkItem.new
+        ftk_item_object.save
         @assembler.link_to_parent(ftk_item_object, ff_intermed)
-        ftk_item_object.relationships[:self][:is_member_of].size.should be(1)
-        ftk_item_object.relationships[:self][:is_member_of].first.should eql("info:fedora/#{@disk_objects[2].pid}")
+        ftk_item_object.relationships(:is_member_of).size.should be(1)
+        ftk_item_object.relationships(:is_member_of).first.should eql("info:fedora/#{@disk_objects[2].pid}")
+        ftk_item_object.delete
       end
       it "does not create an is_member_of relationship when no disk image matches" do
         ff_intermed = FactoryGirl.build(:ftk_file)
         ff_intermed.disk_image_name = "will_not_match"
         ftk_item_object = HypatiaFtkItem.new
+        ftk_item_object.save
         @assembler.link_to_parent(ftk_item_object, ff_intermed)
-        ftk_item_object.relationships[:self][:is_member_of].should be_nil
+        ftk_item_object.relationships(:is_member_of).should eql([])
+        ftk_item_object.delete
       end
       it "creates an is_member_of_collection relationship when no disk image matches" do
         ff_intermed = FactoryGirl.build(:ftk_file)
         ff_intermed.disk_image_name = "will_not_match"
         ftk_item_object = HypatiaFtkItem.new
+        ftk_item_object.save
         @assembler.link_to_parent(ftk_item_object, ff_intermed)
-        ftk_item_object.relationships[:self][:is_member_of_collection].first.should eql("info:fedora/#{@coll_pid}")
+        ftk_item_object.relationships(:is_member_of_collection).first.should eql("info:fedora/#{@coll_pid}")
+        ftk_item_object.delete
       end
       it "does not create an is_member_of_collection relationship when a disk image matches" do
         ff_intermed = FactoryGirl.build(:ftk_file)
         ff_intermed.disk_image_name = "single_match"
         ftk_item_object = HypatiaFtkItem.new
+        ftk_item_object.save
         @assembler.link_to_parent(ftk_item_object, ff_intermed)
-        ftk_item_object.relationships[:self][:is_member_of_collection].should be_nil
+        ftk_item_object.relationships(:is_member_of_collection).should eql([])
+        ftk_item_object.delete
       end
     end # context  link_to_parent method for RELS-EXT
 
@@ -120,9 +128,12 @@ describe FtkItemAssembler do
       @assembler = FtkItemAssembler.new(:collection_pid => @coll_pid)
       @ftk_file_intermed = FactoryGirl.build(:ftk_file)
       @ftk_item_object = HypatiaFtkItem.new
-      @assembler.file_dir = "spec/fixtures/ftk"
-      @assembler.display_derivative_dir = "spec/fixtures/ftk/display_derivatives" 
+      @ftk_item_object.save # lazy init of pid in ActiveFedora 3.2
+      @assembler.file_dir = Pathname.new(File.join(__FILE__,'..','..','fixtures','ftk' )).realpath.to_s
+      @assembler.display_derivative_dir = Pathname.new(File.join(__FILE__,'..','..','fixtures','ftk','display_derivatives')).realpath.to_s 
       @file_asset = @assembler.create_file_asset(@ftk_item_object, @ftk_file_intermed)
+      @file_asset.save # lazy init of pid in ActiveFedora 3.2
+      @file_asset.datastreams["DC"] # lazy init in ActiveFedora 3.2
       @ftk_item_pid = @ftk_item_object.internal_uri
       @content_file_ds = @file_asset.datastreams["content"]
       @deriv_file_ds = @file_asset.datastreams["derivative_html"]
@@ -131,7 +142,16 @@ describe FtkItemAssembler do
       @ftk_file_intermed_no_deriv.filename = "foofile.txt"
       @ftk_file_intermed_no_deriv.export_path = "files/foofile.txt"
       @file_asset_no_deriv = @assembler.create_file_asset(@ftk_item_object, @ftk_file_intermed_no_deriv)
+      @file_asset_no_deriv.save # lazy init of pid in ActiveFedora 3.2
+      @file_asset_no_deriv.datastreams["DC"] # lazy init in ActiveFedora 3.2
       @content_file_ds_no_deriv = @file_asset_no_deriv.datastreams["content"]
+    end
+    
+    after(:all) do
+      # clean up test objects
+      @ftk_item_object.delete
+      @file_asset.delete
+      @file_asset_no_deriv.delete
     end
 
     context "FileAsset creation for FTK file" do
@@ -142,7 +162,7 @@ describe FtkItemAssembler do
       end
       it "creates a FileAsset object with the correct relationships and descriptive metadata" do
         @file_asset.should be_instance_of(FileAsset) # model
-        @file_asset.relationships[:self][:is_part_of].should == ["#{@ftk_item_pid}"]
+        @file_asset.ids_for_outbound(:is_part_of).should == ["#{@ftk_item_pid.gsub("info:fedora/", "")}"]
         # descMetadata:
         desc_md_ds_fields_hash = @file_asset.datastreams["descMetadata"].fields
         # extent value (file size) is computed by FileAsset.add_file_datastream
@@ -151,24 +171,23 @@ describe FtkItemAssembler do
       end
       it "creates the correct FileAsset object for the FTK file and its display derivative" do
         # datastreams:  DC, RELS-EXT, descMetadata, content, derivative-html
-        @file_asset.datastreams.size.should == 5
+        confirm_datastreams(@file_asset,["DC", "RELS-EXT", "descMetadata", "content", "derivative_html"])
         # content file datastream:
-        @content_file_ds[:dsLabel].should ==  @ftk_file_intermed.filename 
-        @content_file_ds[:dsLabel].should == "BURCH1" 
+        @content_file_ds.dsLabel.should ==  @ftk_file_intermed.filename 
+        @content_file_ds.dsLabel.should == "BURCH1" 
         #  can't get mimeType here, even though it is set when the datastream is written to Fedora
         # display derivative datastream
-        @deriv_file_ds[:dsLabel].should ==  @ftk_file_intermed.display_deriv_fname
-        @deriv_file_ds[:dsLabel].should == "BURCH1.htm"
-        @deriv_file_ds[:mimeType].should == "text/html"
+        @deriv_file_ds.dsLabel.should ==  @ftk_file_intermed.display_deriv_fname
+        @deriv_file_ds.dsLabel.should == "BURCH1.htm"
+        @deriv_file_ds.mimeType.should == "text/html"
       end
       it "creates the correct FileAsset object when there is no display derivative" do
-        # datastreams:  DC, RELS-EXT, descMetadata, content
+        confirm_datastreams(@file_asset_no_deriv,["DC", "RELS-EXT", "descMetadata", "content"])
         @file_asset_no_deriv.datastreams.size.should == 4
-        @content_file_ds_no_deriv[:dsLabel].should ==  @ftk_file_intermed_no_deriv.filename 
-        @content_file_ds_no_deriv[:dsLabel].should == "foofile.txt" 
-        @content_file_ds_no_deriv[:mimeType].should == "text/plain"
+        @content_file_ds_no_deriv.dsLabel.should ==  @ftk_file_intermed_no_deriv.filename 
+        @content_file_ds_no_deriv.dsLabel.should == "foofile.txt" 
+        @content_file_ds_no_deriv.mimeType.should == "text/plain"
         @file_asset_no_deriv.datastreams["derivative_html"].should be_nil
-        @file_asset_no_deriv.delete
        end
        it "creates the correct FileAsset object when the content file has no extension" do
          # see  "creates the correct FileAsset object for the FTK file and its display derivative"
@@ -197,17 +216,17 @@ describe FtkItemAssembler do
         @content_md_doc.xpath("/contentMetadata/resource/@objectId").to_s.should eql(@file_asset.pid)
         @content_md_doc.xpath("/contentMetadata/resource/@type").to_s.should eql("file")
         # id attribute on resource element is just a unique identifier
-        @content_md_doc.xpath("/contentMetadata/resource/@id").to_s.should eql(@content_file_ds[:dsLabel])
+        @content_md_doc.xpath("/contentMetadata/resource/@id").to_s.should eql(@content_file_ds.dsLabel)
         @content_md_doc.xpath("/contentMetadata/resource/@id").to_s.should eql("BURCH1")
         @content_md_no_deriv_doc.xpath("/contentMetadata/resource").size.should eql(1)
         @content_md_no_deriv_doc.xpath("/contentMetadata/resource/@objectId").to_s.should eql(@file_asset_no_deriv.pid)
         @content_md_no_deriv_doc.xpath("/contentMetadata/resource/@type").to_s.should eql("file")
-        @content_md_no_deriv_doc.xpath("/contentMetadata/resource/@id").to_s.should eql(@content_file_ds_no_deriv[:dsLabel])
+        @content_md_no_deriv_doc.xpath("/contentMetadata/resource/@id").to_s.should eql(@content_file_ds_no_deriv.dsLabel)
         @content_md_no_deriv_doc.xpath("/contentMetadata/resource/@id").to_s.should eql("foofile.txt")
       end
       it "creates the correct file elements when there is a display derivative" do
         # id attribute on file element must match the label of the datastream in the FileAsset object
-        @content_md_doc.xpath("/contentMetadata/resource/file[@id='#{@content_file_ds[:dsLabel]}']").should_not be_nil
+        @content_md_doc.xpath("/contentMetadata/resource/file[@id='#{@content_file_ds.dsLabel}']").should_not be_nil
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1']").should_not be_nil
 #        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1']/@format").to_s.should eql("BINARY")  # skipping for Hypatia demo
 #        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1']/@mimetype").to_s.should eql("application/octet-stream")  # skipping for Hypatia demo
@@ -222,7 +241,7 @@ describe FtkItemAssembler do
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1']/checksum[@type='sha1']/text()").to_s.should eql(@ftk_file_intermed.sha1)
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1']/checksum[@type='sha1']/text()").to_s.should eql("B6373D02F3FD10E7E1AA0E3B3AE3205D6FB2541C")
         # id attribute on file element must match the label of the datastream in the FileAsset object
-        @content_md_doc.xpath("/contentMetadata/resource/file[@id='#{@deriv_file_ds[:dsLabel]}']").should_not be_nil
+        @content_md_doc.xpath("/contentMetadata/resource/file[@id='#{@deriv_file_ds.dsLabel}']").should_not be_nil
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']").should_not be_nil
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/@format").to_s.should eql("HTML")
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/@mimetype").to_s.should eql("text/html")
@@ -233,14 +252,14 @@ describe FtkItemAssembler do
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/location/@type").to_s.should eql("datastreamID")
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/location/text()").to_s.should eql(@deriv_file_ds.dsid)
 # TODO:  compute md5 and sha1 for deriv html (?)
-#        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='md5']/text()").to_s.should eql(Digest::MD5.hexdigest(@deriv_file_ds.blob.read))
+#        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='md5']/text()").to_s.should eql(Digest::MD5.hexdigest(@deriv_file_ds.content))
         @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='md5']/text()").to_s.should eql("906aec05a5a8de7391daec5681eedcf6")
-        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='sha1']/text()").to_s.should eql(Digest::SHA1.hexdigest(@deriv_file_ds.blob.read))
-        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='sha1']/text()").to_s.should eql("da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='sha1']/text()").to_s.should eql(Digest::SHA1.hexdigest(@deriv_file_ds.content))
+        @content_md_doc.xpath("/contentMetadata/resource/file[@id='BURCH1.htm']/checksum[@type='sha1']/text()").to_s.should eql("84742c2bbe55ce0847145a6c47dc411435932a7e")
       end
       it "creates the correct file element for when there is no display derivative" do
         # id attribute on file element must match the label of the datastream in the FileAsset object
-        @content_md_no_deriv_doc.xpath("/contentMetadata/resource/file[@id='#{@content_file_ds[:dsLabel]}']").should_not be_nil
+        @content_md_no_deriv_doc.xpath("/contentMetadata/resource/file[@id='#{@content_file_ds.dsLabel}']").should_not be_nil
         @content_md_no_deriv_doc.xpath("/contentMetadata/resource/file[@id='foofile.txt']").should_not be_nil
 #        @content_md_no_deriv_doc.xpath("/contentMetadata/resource/file[@id='foofile.txt']/@format").to_s.should eql("BINARY")  # skipping for Hypatia demo
 #        @content_md_no_deriv_doc.xpath("/contentMetadata/resource/file[@id='foofile.txt']/@mimetype").to_s.should eql("application/octet-stream")  # skipping for Hypatia demo
@@ -292,8 +311,8 @@ describe FtkItemAssembler do
     end
     it "has correct RELS-EXT" do
       # our factory ftk file isn't matching any disk images, so relationship to collection object
-      @ftk_item.relationships[:self][:is_member_of_collection].size.should be(1)
-      @ftk_item.relationships[:self][:is_member_of_collection].first.should eql("info:fedora/#{@coll_pid}")
+      @ftk_item.relationships(:is_member_of_collection).size.should eql(1)
+      @ftk_item.relationships(:is_member_of_collection).first.should eql("info:fedora/#{@coll_pid}")
     end
     it "has correct contentMetadata" do
       content_md_ds = @ftk_item.datastreams["contentMetadata"]
@@ -304,7 +323,8 @@ describe FtkItemAssembler do
       content_md_ds.term_values(:html_format).should == ["HTML"]
     end
     it "has a file object with an isPartOf relationship" do
-      @ftk_item.inbound_relationships[:is_part_of].length.should eql(1)
+      part_of = ActiveFedora::Predicates.find_graph_predicate(:is_part_of)
+      @ftk_item.inbound_relationships(part_of).length.should eql(1)
     end
     it "has parts populated with FileAsset for file and display derivative" do
       @ftk_item.parts.size.should be(1)
@@ -312,9 +332,9 @@ describe FtkItemAssembler do
       part.should be_kind_of(FileAsset)
       content_ds = part.datastreams["content"]
       # the (file) datastream of a FileAsset part object should have a label value = filename
-      content_ds[:dsLabel].should == @ff_intermed.filename
+      content_ds.dsLabel.should == @ff_intermed.filename
       html_ds = part.datastreams["derivative_html"]
-      html_ds[:dsLabel].should == "#{@ff_intermed.filename}.htm"
+      html_ds.dsLabel.should == "#{@ff_intermed.filename}.htm"
     end
   end # context "create_hypatia_ftk_item"
 
@@ -325,9 +345,9 @@ describe FtkItemAssembler do
       import_fixture(@coll_pid)
       remove_fixture_ftk_report_objects
       @assembler = FtkItemAssembler.new(:collection_pid => @coll_pid)
-      ftk_report = File.join(File.dirname(__FILE__), "../fixtures/ftk/Gould_FTK_Report.xml")
-      ftk_file_dir = File.join(File.dirname(__FILE__), "../fixtures/ftk")
-      display_derivative_dir = File.join(File.dirname(__FILE__), "../fixtures/ftk/display_derivatives")
+      ftk_report = Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/ftk/Gould_FTK_Report.xml")).realpath.to_s
+      ftk_file_dir = Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/ftk")).realpath.to_s
+      display_derivative_dir = Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/ftk/display_derivatives")).realpath.to_s
       @assembler.process(ftk_report, ftk_file_dir, display_derivative_dir)
       solr_response = get_solr_response_for_ftk_report_objects
       @solr_docs = solr_response.docs
@@ -381,7 +401,7 @@ def build_fixture_disk_objects
   # ensure we don't have duplicates when we don't want to
   clean_fixture_disk_objects 
 
-  di_txt_file = File.join(File.dirname(__FILE__), "/../fixtures/ftk/disk_images/CM5551212.001.txt")
+  di_txt_file = Pathname.new(File.join(File.dirname(__FILE__), "/../fixtures/ftk/disk_images/CM5551212.001.txt")).realpath.to_s
   fdi_intermed = FtkDiskImage.new(di_txt_file)
   di_assembler = FtkDiskImageItemAssembler.new(:disk_image_files_dir => ".", :computer_media_photos_dir => ".")
 
@@ -394,12 +414,12 @@ def build_fixture_disk_objects
   fdi_intermed.disk_name = "mult_match"
   fdi_intermed.case_number = "cn3"
   di3 = di_assembler.build_object(fdi_intermed)
-  di3.add_relationship(:is_member_of_collection, @coll_pid)
+  di3.add_relationship(:is_member_of_collection, "info:fedora/#{@coll_pid}")
   di3.save
   fdi_intermed.disk_name = "no_match"
   fdi_intermed.case_number = "cn4"
   di4 = di_assembler.build_object(fdi_intermed)
-  di4.add_relationship(:is_member_of_collection, @coll_pid)
+  di4.add_relationship(:is_member_of_collection, "info:fedora/#{@coll_pid}")
   di4.save
   return [di1, di2, di3, di4]
 end

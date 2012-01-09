@@ -1,10 +1,9 @@
-require_dependency( 'vendor/plugins/hydra-head/app/controllers/catalog_controller.rb' )
-
 class CatalogController < ApplicationController
-  
+  include Blacklight::Catalog
   helper :all # include all helpers, all the time
   
   before_filter :requirements, :only => [:edit_members,:add_relationships]
+  before_filter :featured_collections, :only => [:index]
   
   def edit_members
     af_base = ActiveFedora::Base.load_instance(params[:id])
@@ -41,6 +40,18 @@ class CatalogController < ApplicationController
     end
 
     render :text => status_text
+  end
+
+  def featured_collections
+    @featured_collections ||= begin
+      response, docs = get_solr_response_for_field_values("id",Blacklight.config[:featured_collections], {:sort=>"title_sort desc"})
+      docs
+    end
+    puts "featured_collections [#{@featured_collections.length}]"
+    @featured_collections.each do |coll|
+      puts coll.inspect
+    end
+    @featured_collections
   end
   
   protected

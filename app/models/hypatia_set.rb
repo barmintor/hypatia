@@ -1,5 +1,6 @@
 # a Fedora object for the Hypatia SET hydra content type
 class HypatiaSet < ActiveFedora::Base
+  include ActiveFedora::Relationships
   # adds helpful methods for basic hydra objects, like permissions manipulations
   include Hydra::ModelMethods
 

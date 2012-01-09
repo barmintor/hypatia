@@ -158,13 +158,13 @@ class FtkItemAssembler
     deriv_ds = file_asset.datastreams["derivative_html"]
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.contentMetadata("type" => "file", "objectId" => ftk_item_pid) {
-        xml.resource("id" => content_ds.label, "type" => "file", "objectId" => file_asset.pid) {
+        xml.resource("id" => content_ds.dsLabel, "type" => "file", "objectId" => file_asset.pid) {
           # TODO:  there should be a format attribute with value per the mime_type / extension -> controlled vocab at 
           #   https://consul.stanford.edu/display/chimera/DOR+file+types+and+attribute+values
-          content_file_attr = {"id" => content_ds.label, "size" => File.size(content_ds.blob), 
+          content_file_attr = {"id" => content_ds.dsLabel, "size" => (content_ds.content.length) ,
                     "preserve" => "yes", "publish" => "yes", "shelve" => "yes"}
-          if (content_ds.mime_type)
-            content_file_attr["mimetype"]= content_ds.mime_type
+          if (content_ds.mimeType)
+            content_file_attr["mimetype"]= content_ds.mimeType
           end
           xml.file(content_file_attr) {
             xml.location("type" => "datastreamID") {
@@ -178,16 +178,16 @@ class FtkItemAssembler
             }
           }
           if deriv_ds
-            xml.file("id" => deriv_ds.label, "mimetype" => deriv_ds.mime_type, "format" => "HTML",
-                      "size" => File.size(deriv_ds.blob), "preserve" => "yes", "publish" => "yes", "shelve" => "yes" ) {
+            xml.file("id" => deriv_ds.dsLabel, "mimetype" => deriv_ds.mimeType, "format" => "HTML",
+                      "size" => (deriv_ds.content.length), "preserve" => "yes", "publish" => "yes", "shelve" => "yes" ) {
               xml.location("type" => "datastreamID") {
                 xml.text "derivative_html"
               }
               xml.checksum("type" => "md5") {
-                  xml.text Digest::MD5.hexdigest(deriv_ds.blob.read)
+                  xml.text Digest::MD5.hexdigest(deriv_ds.content)
               }
               xml.checksum("type" => "sha1") {
-                xml.text Digest::SHA1.hexdigest(deriv_ds.blob.read)
+                xml.text Digest::SHA1.hexdigest(deriv_ds.content)
               }
             }
           end
@@ -249,7 +249,7 @@ class FtkItemAssembler
         matching_hdii_objects.push(HypatiaDiskImageItem.load_instance(sd[:id]))
       }
       matching_hdii_objects.each { |hdii|  
-        if hdii.relationships[:self][:is_member_of_collection].include?("info:fedora/#{@collection_pid}")
+        if hdii.relationships(:is_member_of_collection).include?("info:fedora/#{@collection_pid}")
           hypatia_ftk_item.add_relationship(:is_member_of, hdii)
           hypatia_ftk_item.save
           @logger.debug "HypatiaFtkItem #{hypatia_ftk_item.pid} is now a member of HypatiaDiskImageItem #{hdii.pid}"
@@ -257,7 +257,7 @@ class FtkItemAssembler
         end
       }
     end
-    
+
     if hypatia_ftk_item.sets.size == 0
       coll_obj = HypatiaCollection.load_instance(@collection_pid)
       hypatia_ftk_item.add_relationship(:is_member_of_collection, coll_obj)
@@ -302,8 +302,8 @@ class FtkItemAssembler
         if File.file?(html_filepath)
           html_file = File.new(html_filepath)
           # NOTE:  if mime_type is not set explicitly, Fedora does it ... but it's not testable
-          derivative_ds =  ActiveFedora::Datastream.new(:dsID => "derivative_html", :dsLabel => ftk_file_intermed.display_deriv_fname, :mimeType => "text/html", :blob => html_file, :controlGroup => 'M')
-          file_asset.add_datastream(derivative_ds)
+          derivative_ds =  {:dsid => "derivative_html", :label => ftk_file_intermed.display_deriv_fname, :mimeType => "text/html"}
+          file_asset.add_file_datastream(html_file, derivative_ds)
 #       else
 #         @logger.warn "Couldn't find expected display derivative file #{html_filepath}"
         end

@@ -32,9 +32,12 @@ class FtkDiskImageItemAssembler
     
     raise "Can't find directory #{args[:disk_image_files_dir]}" unless File.directory? args[:disk_image_files_dir]
     @disk_image_files_dir = args[:disk_image_files_dir]
+    @logger.debug "... @disk_image_files_dir = #{@disk_image_files_dir}"
     raise "Can't find directory #{args[:computer_media_photos_dir]}" unless File.directory? args[:computer_media_photos_dir]
     @computer_media_photos_dir = args[:computer_media_photos_dir]
-    @collection_pid = args[:collection_pid]
+    @logger.debug "... @computer_media_photos_dir = #{@computer_media_photos_dir}"
+    self.collection_pid = args[:collection_pid] ? args[:collection_pid].gsub("info:fedora/","") : nil
+    @logger.debug "... @collection_pid = #{@collection_pid}"
     
     @files_hash = {}
     build_files_hash
@@ -107,7 +110,8 @@ class FtkDiskImageItemAssembler
   # @return [HypatiaDiskImageItem]
   def build_object(fdi)
     hypatia_disk_image_item = HypatiaDiskImageItem.new
-    hypatia_disk_image_item.add_relationship(:is_member_of_collection, @collection_pid)
+    #TODO is it legitimate to have a nil @collection_pid? or is that just a testing condition?
+    hypatia_disk_image_item.add_relationship(:is_member_of_collection, "info:fedora/#{@collection_pid}") if @collection_pid
     hypatia_disk_image_item.save
     build_ng_xml_datastream(hypatia_disk_image_item, "descMetadata", build_desc_metadata(fdi))
     build_ng_xml_datastream(hypatia_disk_image_item, "rightsMetadata", build_rights_metadata)
@@ -125,15 +129,24 @@ class FtkDiskImageItemAssembler
   # @param [FtkDiskImage] fdi - has been populated per the FTK produced .txt file, if we have one
   # @return [FileAsset] object for the disk image object
   def create_dd_file_asset(hypatia_disk_image_item, fdi)
-    dd_file_asset = FileAsset.new
+    dd_file_asset = FileAsset.new(:namespace=>'hypatia')
     # the label value ends up in DC dc:title and descMetadata  title ??
     dd_file_asset.label="FileAsset for FTK disk image #{fdi.disk_type} #{fdi.disk_name}"
+    dd_file_asset.save # save and init
     dd_file_asset.add_relationship(:is_part_of, hypatia_disk_image_item)
 
     # For now, only add the dd file for the Xanadu collection, since other dd files are not for public viewing
     if @collection_pid =~ /(gould|xanadu|fixture)/
       file = File.new(@files_hash[fdi.disk_name.to_sym][:dd])
-      dd_file_asset.add_file_datastream(file, {:mimeType => "application/octet-stream", :label => fdi.disk_name})
+      unless (File.size(file).nil? || File.size(file) == 0) # empty file will trigger error in Fedora
+        dd_file_asset.add_file_datastream(file, {:mimeType => "application/octet-stream", :label => fdi.disk_name})
+      else
+        # dsid = dd_file_asset.generate_dsid 
+        # ds =  dd_file_asset.create_datastream(ActiveFedora::Datastream, nil, {:mimeType => "application/octet-stream", :label => fdi.disk_name, :controlGroup => 'X'})
+        # ds.content = ""
+        # dd_file_asset.add_datastream(ds)
+        @logger.warn("#{@files_hash[fdi.disk_name.to_sym][:dd]} is empty")
+      end
     end
 
     dd_file_asset.save
@@ -150,7 +163,7 @@ class FtkDiskImageItemAssembler
     photo_filenames = ["#{photo_path_base}.JPG", "#{photo_path_base}_1.JPG", "#{photo_path_base}_2.JPG"]
     photo_filenames.each { |photo_fname|
       if File.file? photo_fname
-        photo_fa = FileAsset.new
+        photo_fa = FileAsset.new(:namespace=>'hypatia')
         # the label value ends up in DC dc:title and descMetadata  title ??
         photo_fa.label="FileAsset for photo of FTK disk image #{fdi.disk_name}"
         photo_fa.add_relationship(:is_part_of, hypatia_disk_image_item)
@@ -226,9 +239,9 @@ class FtkDiskImageItemAssembler
         dd_file_ds_name = dd_file_asset.datastreams.keys.select {|k| k !~ /(DC|RELS\-EXT|descMetadata)/}.first
         if (dd_file_ds_name)
           dd_file_ds = dd_file_asset.datastreams[dd_file_ds_name]
-          xml.resource("id" => dd_file_ds.label, "type" => "media-file", "objectId" => dd_file_asset.pid){
-            xml.file("id" => dd_file_ds.label, "format" => "BINARY", "mimetype" => dd_file_ds.mime_type, 
-                      "size" => File.size(dd_file_ds.blob), "preserve" => "yes", "publish" => "yes", "shelve" => "yes" ) {
+          xml.resource("id" => dd_file_ds.dsLabel, "type" => "media-file", "objectId" => dd_file_asset.pid){
+            xml.file("id" => dd_file_ds.dsLabel, "format" => "BINARY", "mimetype" => dd_file_ds.mimeType, 
+                      "size" => dd_file_ds.content.length, "preserve" => "yes", "publish" => "yes", "shelve" => "yes" ) {
               xml.location("type" => "datastreamID") {
                 xml.text dd_file_ds.dsid
               }
@@ -272,17 +285,17 @@ class FtkDiskImageItemAssembler
   def add_photo_file_asset(xml, photo_file_asset, resource_type)
     ds_name = photo_file_asset.datastreams.keys.select {|k| k !~ /(DC|RELS\-EXT|descMetadata)/}.first
     ds = photo_file_asset.datastreams[ds_name]
-    xml.resource("id" => ds.label, "type" => resource_type, "objectId" => photo_file_asset.pid){
-      xml.file("id" => ds.label, "format" => "JPG", "mimetype" => ds.mime_type, 
-                "size" => File.size(ds.blob), "preserve" => "yes", "publish" => "yes", "shelve" => "yes" ) {
+    xml.resource("id" => ds.dsLabel, "type" => resource_type, "objectId" => photo_file_asset.pid){
+      xml.file("id" => ds.dsLabel, "format" => "JPG", "mimetype" => ds.mimeType, 
+                "size" => ds.content.length, "preserve" => "yes", "publish" => "yes", "shelve" => "yes" ) {
         xml.location("type" => "datastreamID") {
           xml.text ds.dsid
         }
         xml.checksum("type" => "md5") {
-          xml.text Digest::MD5.hexdigest(ds.blob.read)
+          xml.text Digest::MD5.hexdigest(ds.content)
         }
         xml.checksum("type" => "sha1") {
-          xml.text Digest::SHA1.hexdigest(ds.blob.read)
+          xml.text Digest::SHA1.hexdigest(ds.content)
         }
       }
     }

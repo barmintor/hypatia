@@ -1,5 +1,6 @@
 # an ActiveFedora model for a Hypatia COLLECTION object
 class HypatiaCollection < ActiveFedora::Base
+  include ActiveFedora::Relationships
   # adds helpful methods for basic hydra objects, like permissions manipulations
   include Hydra::ModelMethods
   

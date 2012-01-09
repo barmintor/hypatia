@@ -1,7 +1,6 @@
-require 'vendor/plugins/hydra-head/app/helpers/application_helper.rb'
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
-  
+  include Hydra::ApplicationHelperBehavior
   # overridden for localization
   def application_name
     'Hypatia'
@@ -101,11 +100,6 @@ module ApplicationHelper
   def get_file_attributes_from_fedora(asset_id)
     ds = FileAsset.load_instance(asset_id).datastreams
     return ds["DS1"].attributes if ds.has_key?("DS1")
-  end
-  
-  def featured_collections
-    response,docs = get_solr_response_for_field_values("id",Blacklight.config[:featured_collections], {:sort=>"title_sort desc"})
-    return docs
   end
   
   # given an array of Solr objects**, sort them by display_name_display value

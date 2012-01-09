@@ -1,15 +1,27 @@
-require_dependency( 'vendor/plugins/hydra-head/app/controllers/application_controller.rb')
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 
 class ApplicationController < ActionController::Base
+  # Adds a few additional behaviors into the application controller 
+   include Blacklight::Controller
+  # Please be sure to impelement current_user and user_session. Blacklight depends on 
+  # these methods in order to perform user specific actions. 
+
+  include Blacklight::Controller
+  include HydraHead::Controller
   helper :all # include all helpers, all the time
   before_filter :inject_assets
   protect_from_forgery # See ActionController::RequestForgeryProtection for details
 
   # Scrub sensitive parameters from your log
   # filter_parameter_logging :password
-  
+  def current_user
+    nil
+  end
+  def user_session
+    nil
+  end
+
   protected
   
   def inject_assets
