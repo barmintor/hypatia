@@ -36,9 +36,9 @@ namespace :hypatia do
   desc "Run the hypatia specs.  Must have jetty already running and fixtures loaded."
   Spec::Rake::SpecTask.new(:spec) do |t|
 #     t.spec_opts = ['--options', "/spec/spec.opts"]
-    t.pattern = 'spec/**/*_spec.rb'
+    t.pattern = 'test_support/spec/**/*_spec.rb'
     t.rcov = true
-    t.rcov_opts = IO.readlines("spec/rcov.opts").map {|l| l.chomp.split " "}.flatten
+    t.rcov_opts = IO.readlines("test_support/spec/rcov.opts").map {|l| l.chomp.split " "}.flatten
   end
 
 

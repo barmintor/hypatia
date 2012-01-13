@@ -56,25 +56,25 @@ task :stats => "spec:statsetup"
 
 desc "Run all specs in spec directory (excluding plugin specs)"
 Spec::Rake::SpecTask.new(:spec => spec_prereq) do |t|
-  t.spec_opts = ['--options', "\"#{Rails.root}/spec/spec.opts\""]
+  t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
   t.pattern = 'spec/**/*_spec.rb'
 end
 
 namespace :spec do
   desc "Run all specs in spec directory with RCov (excluding plugin specs)"
   Spec::Rake::SpecTask.new(:rcov) do |t|
-    t.spec_opts = ['--options', "\"#{Rails.root}/spec/spec.opts\""]
-    t.pattern = 'spec/**/*_spec.rb'
+    t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
+    t.pattern = 'test_support/spec/**/*_spec.rb'
     t.rcov = true
     t.rcov_opts = lambda do
-      IO.readlines("#{Rails.root}/spec/rcov.opts").map {|l| l.chomp.split " "}.flatten
+      IO.readlines("#{Rails.root}/test_support/spec/rcov.opts").map {|l| l.chomp.split " "}.flatten
     end
   end
 
   desc "Print Specdoc for all specs (excluding plugin specs)"
   Spec::Rake::SpecTask.new(:doc) do |t|
     t.spec_opts = ["--format", "specdoc", "--dry-run"]
-    t.pattern = 'spec/**/*_spec.rb'
+    t.pattern = 'test_support/spec/**/*_spec.rb'
   end
 
   desc "Print Specdoc for all plugin examples"
@@ -86,21 +86,21 @@ namespace :spec do
   [:models, :controllers, :views, :helpers, :lib, :integration].each do |sub|
     desc "Run the code examples in spec/#{sub}"
     Spec::Rake::SpecTask.new(sub => spec_prereq) do |t|
-      t.spec_opts = ['--options', "\"#{Rails.root}/spec/spec.opts\""]
-      t.pattern = "spec/#{sub}/**/*_spec.rb"
+      t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
+      t.pattern = "test_support/spec/#{sub}/**/*_spec.rb"
     end
   end
 
   desc "Run the code examples in vendor/plugins (except RSpec's own)"
   Spec::Rake::SpecTask.new(:plugins => spec_prereq) do |t|
-    t.spec_opts = ['--options', "\"#{Rails.root}/spec/spec.opts\""]
+    t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
     t.pattern = 'vendor/plugins/**/spec/**/*_spec.rb'
   end
 
   namespace :plugins do
     desc "Runs the examples for rspec_on_rails"
     Spec::Rake::SpecTask.new(:rspec_on_rails) do |t|
-      t.spec_opts = ['--options', "\"#{Rails.root}/spec/spec.opts\""]
+      t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
       t.pattern = 'vendor/plugins/rspec-rails/spec/**/*_spec.rb'
     end
   end
@@ -108,28 +108,28 @@ namespace :spec do
   # Setup specs for stats
   task :statsetup do
     require 'code_statistics'
-    ::STATS_DIRECTORIES << %w(Model\ specs spec/models) if File.exist?('spec/models')
-    ::STATS_DIRECTORIES << %w(View\ specs spec/views) if File.exist?('spec/views')
-    ::STATS_DIRECTORIES << %w(Controller\ specs spec/controllers) if File.exist?('spec/controllers')
-    ::STATS_DIRECTORIES << %w(Helper\ specs spec/helpers) if File.exist?('spec/helpers')
-    ::STATS_DIRECTORIES << %w(Library\ specs spec/lib) if File.exist?('spec/lib')
-    ::STATS_DIRECTORIES << %w(Routing\ specs spec/routing) if File.exist?('spec/routing')
-    ::STATS_DIRECTORIES << %w(Integration\ specs spec/integration) if File.exist?('spec/integration')
-    ::CodeStatistics::TEST_TYPES << "Model specs" if File.exist?('spec/models')
-    ::CodeStatistics::TEST_TYPES << "View specs" if File.exist?('spec/views')
-    ::CodeStatistics::TEST_TYPES << "Controller specs" if File.exist?('spec/controllers')
-    ::CodeStatistics::TEST_TYPES << "Helper specs" if File.exist?('spec/helpers')
-    ::CodeStatistics::TEST_TYPES << "Library specs" if File.exist?('spec/lib')
-    ::CodeStatistics::TEST_TYPES << "Routing specs" if File.exist?('spec/routing')
-    ::CodeStatistics::TEST_TYPES << "Integration specs" if File.exist?('spec/integration')
+    ::STATS_DIRECTORIES << %w(Model\ specs test_support/spec/models) if File.exist?('test_support/spec/models')
+    ::STATS_DIRECTORIES << %w(View\ specs test_support/spec/views) if File.exist?('test_support/spec/views')
+    ::STATS_DIRECTORIES << %w(Controller\ specs test_support/spec/controllers) if File.exist?('test_support/spec/controllers')
+    ::STATS_DIRECTORIES << %w(Helper\ specs test_support/spec/helpers) if File.exist?('test_support/spec/helpers')
+    ::STATS_DIRECTORIES << %w(Library\ specs test_support/spec/lib) if File.exist?('test_support/spec/lib')
+    ::STATS_DIRECTORIES << %w(Routing\ specs test_support/spec/routing) if File.exist?('test_support/spec/routing')
+    ::STATS_DIRECTORIES << %w(Integration\ specs test_support/spec/integration) if File.exist?('test_support/spec/integration')
+    ::CodeStatistics::TEST_TYPES << "Model specs" if File.exist?('test_support/spec/models')
+    ::CodeStatistics::TEST_TYPES << "View specs" if File.exist?('test_support/spec/views')
+    ::CodeStatistics::TEST_TYPES << "Controller specs" if File.exist?('test_support/spec/controllers')
+    ::CodeStatistics::TEST_TYPES << "Helper specs" if File.exist?('test_support/spec/helpers')
+    ::CodeStatistics::TEST_TYPES << "Library specs" if File.exist?('test_support/spec/lib')
+    ::CodeStatistics::TEST_TYPES << "Routing specs" if File.exist?('test_support/spec/routing')
+    ::CodeStatistics::TEST_TYPES << "Integration specs" if File.exist?('test_support/spec/integration')
   end
 
   namespace :db do
     namespace :fixtures do
-      desc "Load fixtures (from spec/fixtures) into the current environment's database.  Load specific fixtures using FIXTURES=x,y. Load from subdirectory in test/fixtures using FIXTURES_DIR=z."
+      desc "Load fixtures (from test_support/spec/fixtures) into the current environment's database.  Load specific fixtures using FIXTURES=x,y. Load from subdirectory in test/fixtures using FIXTURES_DIR=z."
       task :load => :environment do
         ActiveRecord::Base.establish_connection(Rails.env)
-        base_dir = File.join(Rails.root, 'spec', 'fixtures')
+        base_dir = File.join(Rails.root, 'test_support', 'spec', 'fixtures')
         fixtures_dir = ENV['FIXTURES_DIR'] ? File.join(base_dir, ENV['FIXTURES_DIR']) : base_dir
 
         require 'active_record/fixtures'
