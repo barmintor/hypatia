@@ -1,18 +1,12 @@
 class CatalogController < ApplicationController
   include Blacklight::Catalog
+  include Hydra::Catalog
   helper :all # include all helpers, all the time
   
   before_filter :requirements, :only => [:edit_members,:add_relationships]
   before_filter :featured_collections, :only => [:index]
-  
+
   def edit_members
-    af_base = ActiveFedora::Base.load_instance(params[:id])
-    the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
-    if the_model.nil?
-      the_model = DcDocument
-    end
-    
-    @document_fedora = the_model.load_instance(params[:id])
     q = build_lucene_query("\" AND NOT _query_:\"info\\\\:fedora/afmodel\\\\:HypatiaCollection")
     @response, @document_list = get_search_results(:q => q)
     @folder_response, @folder_list = get_solr_response_for_field_values("id",session[:folder_document_ids] || [])
@@ -67,6 +61,6 @@ class CatalogController < ApplicationController
     if the_model.nil?
       the_model = DcDocument
     end
-    return the_model.load_instance(id)
+    return af_base.adapt_to(the_model)
   end
 end

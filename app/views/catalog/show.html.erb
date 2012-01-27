@@ -44,7 +44,7 @@
   </div>
 </div>
 
-<%= render :partial=>'solr_request' %>
-<% if @document.marc %>
+<%# = render :partial=>'solr_request' %>
+<% if @document.respond_to? :marc %>
   <%= @document.marc.to_zotero(document_partial_name(@document)) %>
 <% end %>

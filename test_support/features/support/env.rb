@@ -54,3 +54,5 @@ end
 # See https://github.com/cucumber/cucumber-rails/blob/master/features/choose_javascript_database_strategy.feature
 Cucumber::Rails::Database.javascript_strategy = :truncation
 
+#Capybara.server_port = 3000
+#Capybara.app_host = "localhost:#{Capybara.server_port}"

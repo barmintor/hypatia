@@ -1,35 +1,36 @@
-<% if params[:q].blank? and params[:f].blank? and params[:search_field].blank? %>
+<% unless has_search_parameters? %>
 	<%# if there are no input/search related params, display the "home" partial -%>
 	<%= render 'home' %>
 <% else %>
 
-	<div id="results">
+  <div id="results">
 
-	<% @page_title = application_name + " Search Results" %>
-	
-	<%= render :partial => 'search_form' %>	
-	
-	<%= render :partial => 'did_you_mean' %>
-	
-	<%= render 'constraints', :localized_params=>params %>
-	
-  <%= render 'results_pagination' %>
+    <% @page_title = application_name + " Search Results" %>
+    <% extra_head_content << render_opensearch_response_metadata.html_safe %>
 
-  <div class="pageEntriesInfo">
-    <%= page_entries_info @response.docs, :entry_name=>'item' %>
-  </div>
+    <%= render :partial => 'search_form' %>	
+	
+    <%= render :partial => 'did_you_mean' %>
+	
+    <%= render 'constraints', :localized_params=>params %>
+	
+    <%= render 'results_pagination' %>
+
+    <div class="pageEntriesInfo">
+      <%= render_pagination_info @response, :entry_name=>'item' %>
+    </div>
   
-	<%= render 'sort_and_per_page' %>
+    <%= render 'sort_and_per_page' %>
 	
-	<%= render :partial=>'document_list' %>
+    <%= render :partial=>'document_list' %>
 	
-	<% sidebar_items << capture do %>
-	  <%= render :partial=>'facets' %>
-	<% end %>
+    <% sidebar_items << capture do %>
+      <%= render :partial=>'facets' %>
+    <% end %>
 
-  <%= render 'results_pagination' %>
+    <%= render 'results_pagination' %>
     
-	<%= render :partial=>'solr_request' %>
-</div>
+    <%#= render :partial=>'solr_request' %>
+  </div>
 
 <% end %>

@@ -43,5 +43,6 @@ if Hydra.respond_to?(:configure)
                                         {:name => "permissions",     :edit_partial => "permissions/permissions_form",              :show_partial => "shared/show_permissions"}
                                        ]
       }
+      config[:permissions]={:edit=>{:group=>nil,:individual=>nil},:read=>{:group=>nil,:individual=>nil}}
   end
 end

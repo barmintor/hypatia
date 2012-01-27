@@ -1,7 +1,17 @@
 class User < ActiveRecord::Base
-# Connects this user object to Blacklights Bookmarks and Folders. 
   include Blacklight::User
+  include Hydra::User
+  acts_as_authentic do |c|
+  end
+
+  validates_presence_of :email
+  validates_uniqueness_of :email
+
+  validates_presence_of :password, :on => :create
+  validates_confirmation_of :password
   
+  validates_presence_of :login
+  validates_uniqueness_of :login
   #
   # Does this user actually exist in the db?
   #

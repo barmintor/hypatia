@@ -99,7 +99,12 @@ module ApplicationHelper
   
   def get_file_attributes_from_fedora(asset_id)
     ds = FileAsset.load_instance(asset_id).datastreams
-    return ds["DS1"].attributes if ds.has_key?("DS1")
+    if ds.has_key? "DS1"
+      ds = ds["DS1"]
+      {:pid => ds.pid, :dsid => ds.dsid, :label => ds.label, :mime_type => ds.mimeType}
+    else
+      {}
+    end
   end
   
   # given an array of Solr objects**, sort them by display_name_display value

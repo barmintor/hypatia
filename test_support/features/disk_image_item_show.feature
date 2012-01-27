@@ -8,6 +8,7 @@ Feature: Disk Image Item Show page
     And I should see a link to the show page for "hypatia:fixture_coll2" with label "Fake Collection"
 
   Scenario: links to members (children) of this object
+    Given I am logged in as the "archivist1" user
     When I am on the document page for id "hypatia:fixture_media_item" 
     Then I should see "In this Collection"
     And I should see a link to the show page for "hypatia:fixture_ftk_file_item" with label "BU3A5"

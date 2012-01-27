@@ -3,7 +3,8 @@ Feature: Set Object Show View
   I want to see Set object data displaying properly
 
   Scenario: links to parents (collections or sets) of this object
-    When I am on the document page for id "hypatia:fixture_intermed1" 
+    Given I am logged in as the "archivist1" user
+    When I am on the document page for id "hypatia:fixture_intermed1"
     Then I should see "Member of"
     And I should see a link to the show page for "hypatia:fixture_coll" with label "Collection"
     When I am on the document page for id "hypatia:fixture_intermed2" 

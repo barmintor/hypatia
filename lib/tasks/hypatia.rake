@@ -1,5 +1,6 @@
 require 'rspec/core/rake_task'
 require "cucumber/rake/task"
+require "active-fedora"
 
 # number of seconds to pause after issuing commands to return a git repos to its pristine state (e.g. make jetty squeaky clean)
 GIT_RESET_WAIT = 7
@@ -49,14 +50,17 @@ namespace :hypatia do
 # NOTE: features fail if test solr is empty. - must load features fresh first (?)
     desc "Run cucumber features for hypatia. Must have jetty already running and fixtures loaded."
     task :run do
-      puts %x[cucumber --color --format progress features]
+      puts %x[cucumber --color --format progress test_support/features]
       raise "Cucumber tests failed" unless $?.success?
     end
 
     desc "(Re)loads fixtures, then runs cucumber features.  Must have jetty already running."
-    task :fixtures_then_run do
-      system("rake hypatia:fixtures:refresh environment=test")
+    task :fixtures_then_run => :environment do
+      old_env = Rails.env
+      Rails.env = 'test'
+      Rake::Task["hypatia:fixtures:refresh"].invoke
       Rake::Task["hypatia:cucumber:run"].invoke
+      Rails.env = old_env
     end    
 
   end # hypatia:cucumber namespace
@@ -205,8 +209,54 @@ namespace :hypatia do
 
 end # hypatia namespace
 
+namespace :repo do
+  desc "Delete and re-import the object identified by pid" 
+  task :refresh => [:delete,:load]
+  
+  desc "Delete the object identified by pid. Example: rake repo:delete pid=demo:12"
+  task :delete => :init do
+    if ENV["pid"].nil? 
+      puts "You must specify a valid pid.  Example: rake repo:delete pid=demo:12"
+    else
+      delete(ENV["pid"])
+    end
+  end
+  desc "Load the object located at the provided path or identified by pid. Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
+  task :load => :init do
+    if !ENV["path"].nil? 
+      filename = ENV["path"]
+    elsif !ENV["pid"].nil?
+      pid = ENV["pid"]
+      filename = fixture_path(pid)
+    else
+      puts "You must specify a path to the object or provide its pid.  Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
+      return
+    end
+    load_fixture(filename)
+  end
+
+  
+  desc "Init ActiveFedora configuration" 
+  task :init do
+    init_active_fedora
+  end
+end # repo namespace
 
 #-------------- SUPPORTING METHODS -------------
+
+def fixture_path(pid)
+  File.join("test_support","fixtures","#{pid.gsub(":","_")}.foxml.xml")
+end
+
+def index_fedora_doc(id)
+    af_base = ActiveFedora::Base.load_instance(id)
+    the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
+    if the_model.nil?
+      the_model = DcDocument
+    end
+    af_base = af_base.adapt_to(the_model)
+    af_base.send :update_index
+end
 
 # load a Fedora object from foxml, putting it in Fedora and indexing it into
 # Solr
@@ -224,21 +274,45 @@ def load_foxml(file, pid)
   end 
 end
 
+def init_active_fedora(opts={})
+  if opts[:environment].nil? and !ENV["environment"].nil? 
+    opts[:environment] = ENV["environment"]
+  end
+  opts[:environment] = 'test' # I can't hunt this down right now
+  # If Fedora Repository connection is not already initialized, initialize it using ActiveFedora defaults
+  ActiveFedora.init(opts) unless ActiveFedora.config_loaded? # Thread.current[:repo]  
+end
+
 # load all the fixtures in the passed array of fixture pids
 #   pid is converted to file name by substituting : for _
 def load_fixtures(fixture_pids)
   fixture_pids.each { |f|  
-    load_fixture(f) 
+    load_fixture_from_pid(f) 
   }
+end
+
+def load_fixture_from_pid(pid)
+  filename = fixture_path(pid)
+  load_fixture_from_file(filename)
 end
 
 # load a fixture object
 #   pid is converted to file name by substituting : for _
-def load_fixture(fixture_pid)
-  ENV["fixture"] = nil
-  ENV["pid"] = fixture_pid
-  Rake::Task["hydra:import_fixture"].reenable
-  Rake::Task["hydra:import_fixture"].invoke  
+def load_fixture_from_file(filename)
+  if !filename.nil? and File.exist?(filename)
+    init_active_fedora
+    puts "Loading '#{filename}' in #{ActiveFedora.fedora_config[:url]}"
+    file = File.new(filename, "r")
+    result = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
+    if result
+      puts "The object has been loaded as #{result.body}"
+      pid = result.body
+      index_fedora_doc(pid) 
+    else
+      puts "Failed to load the foxml at #{filename}."
+    end
+  end    
+
 end
 
 # delete all the objects in the passed array of pids (from Fedora and Solr)
@@ -250,10 +324,19 @@ end
 
 # delete an object (from Fedora and Solr)
 def delete(pid)
-  ENV["fixture"] = nil
-  ENV["pid"] = pid
-  Rake::Task["hydra:delete"].reenable
-  Rake::Task["hydra:delete"].invoke  
+  init_active_fedora
+  if pid.nil? 
+    puts "You must specify a valid pid.  Example: rake repo:delete pid=demo:12"
+  else
+    begin
+      ActiveFedora::Base.load_instance(pid).delete
+      puts "Deleted '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
+    rescue ActiveFedora::ObjectNotFoundError
+      puts "The object #{pid} has already been deleted (or was never created)."
+    rescue Errno::ECONNREFUSED => e
+        puts "Can't connect to Fedora! Are you sure jetty is running?"
+    end
+  end
 end
 
 # refresh (delete, then load) all the fixtures in the passed array of pids

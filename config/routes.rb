@@ -8,5 +8,6 @@ Hypatia::Application.routes.draw do
   # default routes
   match ':controller/:action/:id'
   match ':controller/:action/:id.:format'
+  resources :users
   resources :user_sessions
 end
