@@ -18,6 +18,10 @@ class ApplicationController < ActionController::Base
     user_session
   end
 
+  def layout_name
+    'application'
+  end
+
   protected
   
   def inject_assets
