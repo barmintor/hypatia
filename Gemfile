@@ -11,6 +11,7 @@ gem 'columnize'
 gem 'crack'
 gem 'curb', '0.7.15'
 gem 'database_cleaner'
+gem "devise", "~>1.5.3"
 gem 'diff-lcs'
 gem 'facets', '2.9.2'
 gem 'haml'
@@ -44,7 +45,6 @@ gem 'yard'
 gem 'block_helpers', "~>0.3.3"
 
 group :blacklight do
-  gem "authlogic", "3.1.0"
   gem "marc", "~>0.4.0"
   gem "rsolr", "= 1.0.2"
   gem "rsolr-ext",  "~> 1.0.3"

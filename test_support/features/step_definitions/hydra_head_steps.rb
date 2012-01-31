@@ -11,8 +11,8 @@ Given /I am logged in as the "(.*)" user/ do |login|
   # Given %{a User exists with a Login of "#{login}"}
   user = User.create(:login => login, :email => email, :password => "password", :password_confirmation => "password")
   User.find_by_login(login).should_not be_nil
-  visit logout_path
-  visit login_path
+  visit destroy_user_session_path
+  visit new_user_session_path
   fill_in "Login", :with => login
   fill_in "Password", :with => "password"
   click_button "Login"

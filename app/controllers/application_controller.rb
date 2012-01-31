@@ -8,18 +8,14 @@ class ApplicationController < ActionController::Base
   # these methods in order to perform user specific actions. 
 
   include Blacklight::Controller
+  include Hydra::Controller
   include HydraHead::Controller
   helper :all # include all helpers, all the time
   before_filter :inject_assets
   protect_from_forgery # See ActionController::RequestForgeryProtection for details
 
-  # Scrub sensitive parameters from your log
-  # filter_parameter_logging :password
-  def current_user
-    nil
-  end
-  def user_session
-    nil
+  def current_user_session
+    user_session
   end
 
   protected

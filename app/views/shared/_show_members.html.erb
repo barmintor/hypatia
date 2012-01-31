@@ -8,11 +8,11 @@
 			<%- end -%>
 		</ul>		
 		<% if controller.action_name == "edit" && editor? %>
-		  <a class="edit-relationships" href="edit_members">Edit Relationships &rarr;</a>
+		  <a class="edit-relationships" href="edit_members">Edit Relationships &#x2192;</a>
 		<% end %>
 	</div>	
 <%- elsif controller.action_name == "edit" && editor? -%>
   <div class="sets members sidebar-section<%= " first" if (!@document_fedora.respond_to?(:sets) or @document_fedora.sets(:response_format=>:solr).hits.empty?) %>">
-    <a class="edit-relationships" href="edit_members">Edit Relationships &rarr;</a>
+    <a class="edit-relationships" href="edit_members">Edit Relationships &#x2192;</a>
   </div>
 <% end -%>

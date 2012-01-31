@@ -57,14 +57,14 @@ task :stats => "spec:statsetup"
 desc "Run all specs in spec directory (excluding plugin specs)"
 Spec::Rake::SpecTask.new(:spec => spec_prereq) do |t|
   t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
-  t.pattern = 'spec/**/*_spec.rb'
+  t.pattern = 'test_support/spec/**/*_spec.rb'
 end
 
 namespace :spec do
   desc "Run all specs in spec directory with RCov (excluding plugin specs)"
   Spec::Rake::SpecTask.new(:rcov) do |t|
     t.spec_opts = ['--options', "\"#{Rails.root}/test_support/spec/spec.opts\""]
-    t.pattern = 'test_support/spec/**/*_spec.rb'
+    t.pattern = 'test_support/**/*_spec.rb'
     t.rcov = true
     t.rcov_opts = lambda do
       IO.readlines("#{Rails.root}/test_support/spec/rcov.opts").map {|l| l.chomp.split " "}.flatten

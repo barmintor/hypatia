@@ -1,7 +1,10 @@
 # require 'blacklight/render_constraints_helper_behavior'
 module RenderConstraintsHelper
   include ::Blacklight::RenderConstraintsHelperBehavior
-
+  
+  def render_constraint_element(label, value, options = {})
+      render(:partial => "catalog/constraints_element", :locals => {:label => label, :value => t(value), :options => options})    
+  end
   #def render_constraints_filters(localized_params = params)
   #   return "".html_safe unless localized_params[:f]
   #   content = ""

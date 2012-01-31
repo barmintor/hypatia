@@ -1,21 +1,33 @@
 class User < ActiveRecord::Base
-  include Blacklight::User
-  include Hydra::User
-  acts_as_authentic do |c|
+# Connects this user object to Blacklights Bookmarks and Folders. 
+ include Blacklight::User
+ include Hydra::User
+  # Include default devise modules. Others available are:
+  # :token_authenticatable, :encryptable, :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable, :encryptable,
+         :authentication_keys => [:login]
+
+  # Setup accessible (or protected) attributes for your model
+  attr_accessible :login, :email, :password, :password_confirmation, :remember_me
+
+  validates_uniqueness_of :login, :email, :case_sensitive => false
+
+  def login
+    read_attribute(:login).to_s
   end
 
-  validates_presence_of :email
-  validates_uniqueness_of :email
+  # Method added by Blacklight; Blacklight uses #to_s on your
+  # user class to get a user-displayable login/identifier for
+  # the account. 
+  def to_s
+    email
+  end
 
-  validates_presence_of :password, :on => :create
-  validates_confirmation_of :password
-  
-  validates_presence_of :login
-  validates_uniqueness_of :login
-  #
-  # Does this user actually exist in the db?
-  #
-  def is_real?
-    self.class.count(:conditions=>['id = ?',self.id]) == 1
+  protected
+  def self.find_for_database_authentication(conditions)
+    value = conditions.dup.delete(:login)
+    value = value.strip.downcase
+    where(["lower(login) = :value OR lower(email) = :value", {:value => value}]).first
   end
 end

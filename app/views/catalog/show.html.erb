@@ -4,14 +4,14 @@
 -%>
 <div id="showHead">
   <div id="showUtils">
-    <span class="back_to_cat"><%= link_back_to_catalog :label=>'&larr; Return to search results' %></span>
+    <span class="back_to_cat"><%= (link_back_to_catalog :label=>'&#x2190; Return to search results'.html_safe) %></span>
     <%- if @previous_document || @next_document -%>
       <span class="results-pagination">
   	    <span class="previous">
   	      <%- if @previous_document -%>
     	      <%= link_to_previous_document(@previous_document) %>
     	    <%- else -%>
-    	      &laquo; Previous
+    	      &#xab; Previous
     	    <%- end -%>
   	    </span>
         <%- if session[:search][:counter].to_i > 0 -%>
@@ -23,7 +23,7 @@
   	      <%- if @next_document -%>
     	      <%= link_to_next_document(@next_document)%>
     	    <%- else -%>
-    	      Next &raquo;
+    	      Next &#xbb;
     	    <%- end -%>
   	    </span>	
       </span>
@@ -37,7 +37,7 @@
 </div>
 <div id="document" class="<%= controller.action_name == "edit" ? "document_edit" : "document_show" %> <%= "combined_document_view" if session[:scripts] %>">
   <div id="<%= format_pid(@document[:id]) %>">
-    <%= controller.action_name == "edit" ? '<h1>Add Your Work</h1>' : '<h1 class="document-heading">' + doc_title + '</h1>' %>
+    <%= controller.action_name == "edit" ? '<h1>Add Your Work</h1>'.html_safe : ('<h1 class="document-heading">' + doc_title + '</h1>').html_safe %>
     <div class="document">
       <%= render_document_partial @document, params["action"] %>
     </div>

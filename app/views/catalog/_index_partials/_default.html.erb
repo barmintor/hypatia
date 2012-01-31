@@ -7,7 +7,7 @@
   </td>
   <td>
     <% logger.error document.inspect %>
-    <%= DateTime.parse(document.fetch(:system_create_dt,"0")).to_time %>
+    <%= DateTime.parse(document.fetch(:system_create_dt,"1975-12-27")).to_time %>
   </td>
   <td>
     <%= (document.fetch(:medium_t,nil) || document_type(document)).gsub("Hydrangea","") %>

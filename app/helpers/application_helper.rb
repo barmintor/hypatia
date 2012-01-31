@@ -10,7 +10,7 @@ module ApplicationHelper
   def display_ds_values_as_dl_element(dsid, solr_fld_sym, display_label)
     values = get_values_from_datastream(@document_fedora, dsid, [solr_fld_sym])
     unless values.first.empty?
-      result = "<dt>#{display_label}</dt><dd>#{values.join(', ')}</dd>"
+      result = "<dt>#{display_label}</dt><dd>#{values.join(', ')}</dd>".html_safe
     end
     result 
   end
@@ -71,7 +71,7 @@ module ApplicationHelper
   def render_field_from_index(doc,field,label,options={})
     values = get_values_from_index(doc,field,options)
     return nil if values.nil?
-    "<dt>#{label}</dt><dd>#{values}</dd>"
+    "<dt>#{label}</dt><dd>#{values}</dd>".html_safe
   end
   
   def get_members_from_solr(document)

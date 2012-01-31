@@ -16,12 +16,12 @@ module HydraFedoraMetadataHelper
       extra_index += 1
       base_id = generate_base_id(field_name, current_value, field_values, opts)
       name = "asset[#{datastream_name}][#{field_name}][#{z}]"
-        body << "<input class=\"editable-edit edit\" id=\"#{base_id}\" data-datastream-name=\"#{datastream_name}\" name=\"#{name}\" value=\"#{h(current_value.strip)}\" #{required unless z > 0} #{disabled} type=\"text\" />"
-        body << "<a href=\"\" title=\"Delete '#{h(current_value)}'\" class=\"destructive field\">Delete</a>" if opts.fetch(:multiple, true) && !current_value.empty?
+      body << "<input class=\"editable-edit edit\" id=\"#{base_id}\" data-datastream-name=\"#{datastream_name}\" name=\"#{name}\" value=\"#{h(current_value.strip)}\" #{('required="' + required + '"') unless z > 0} #{('disabled="' + disabled + '"') unless disabled.eql? ""} type=\"text\" />"
+      body << "<a href=\"\" title=\"Delete '#{h(current_value)}'\" class=\"destructive field\">Delete</a>" if opts.fetch(:multiple, true) && !current_value.empty?
     end
-    body << "<br/><span class='new-fields'>&nbsp;</span><br/>#{link_to("Add field", "", :class=>"add-field", :"data-iterate"=>extra_index)}".html_safe if opts.fetch(:multiple,false)
+    body << "<br/><span class='new-fields'>&#160;</span><br/>#{link_to("Add field", "", :class=>"add-field", :"data-iterate"=>extra_index)}" if opts.fetch(:multiple,false)
     result = field_selectors_for(datastream_name, field_key)
-    result << body
+    result << body.html_safe
   
     return result
   end
