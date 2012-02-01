@@ -17,6 +17,10 @@ class ApplicationController < ActionController::Base
   def current_user_session
     user_session
   end
+  
+  def user_key
+    current_user ? current_user.login : ""
+  end
 
   def layout_name
     'application'

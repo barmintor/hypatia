@@ -43,6 +43,13 @@ if Hydra.respond_to?(:configure)
                                         {:name => "permissions",     :edit_partial => "permissions/permissions_form",              :show_partial => "shared/show_permissions"}
                                        ]
       }
-      config[:permissions]={:edit=>{:group=>nil,:individual=>nil},:read=>{:group=>nil,:individual=>nil}}
+      config[:permissions] = {
+            :catchall => "access_t",
+            :discover => {:group =>"discover_access_group_t", :individual=>"discover_access_person_t"},
+            :read => {:group =>"read_access_group_t", :individual=>"read_access_person_t"},
+            :edit => {:group =>"edit_access_group_t", :individual=>"edit_access_person_t"},
+            :owner => "depositor_t",
+            :embargo_release_date => "embargo_release_date_dt"
+          }
   end
 end

@@ -52,6 +52,7 @@ Blacklight.configure(:shared) do |config|
     :qt => "search",
     :per_page => 10
   }
+  config[:public_qt] = "search"
   
 
   # solr field values given special treatment in the show (single result) view
