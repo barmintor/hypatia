@@ -145,7 +145,7 @@ class FtkDiskImageItemAssembler
         # ds =  dd_file_asset.create_datastream(ActiveFedora::Datastream, nil, {:mimeType => "application/octet-stream", :label => fdi.disk_name, :controlGroup => 'X'})
         # ds.content = ""
         # dd_file_asset.add_datastream(ds)
-        @logger.warn("#{@files_hash[fdi.disk_name.to_sym][:dd]} is empty")
+        @logger.warn("#{@files_hash[fdi.disk_name.to_sym][:dd]} is empty; no content or contentMetadata will be created")
       end
     end
 
