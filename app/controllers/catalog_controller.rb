@@ -82,6 +82,10 @@ class CatalogController < ApplicationController
       # end
     end
     
+    def enforce_update_members_permissions(opts={})
+      enforce_edit_permissions(opts)
+    end
+    
     def add_access_controls_to_solr_params(solr_parameters, user_parameters)
       apply_gated_discovery(solr_parameters, user_parameters)
       if !reader? 
