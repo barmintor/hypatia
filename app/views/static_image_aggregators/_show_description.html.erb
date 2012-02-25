@@ -1,0 +1,37 @@
+<div class="descMetadata metadata-section">
+  <h2 class="section-title">Description</h2>
+  <span class="show-hide" style="display:none;">Hide Section</span>
+  <div class="toggle-section">
+    <div class="descMetadata metadata-subsection">
+      <h3 class="subsection-title">Description</h3>
+      <dl class="collection-metadata-list">
+        <%= display_ds_values_as_dl_element("descMetadata", :abstract, "Abstract") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:origin_info,:date], "Created") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:subject,:topic], "Subject") %>
+        <%= display_ds_values_as_dl_element("descMetadata", :language_code, "Language Code") %>
+      </dl>
+    </div>
+    <div class="descMetadata metadata-subsection">
+      <h3 class="subsection-title">Physical Description</h3>
+      <dl class="collection-metadata-list">
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description, :form_marc], "MARC Form") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description, :form_aat], "AAT Form") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description, :form], "General Form") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description,:extent], "Extent") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description,:reformatting_quality], "Reformatting Quality") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description,:internet_media_type], "Internet Media Type") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:physical_description,:digital_origin], "Digital Origin") %>
+      </dl>
+    </div>
+    <div class="descMetadata metadata-subsection">
+      <h3 class="subsection-title">Repository Information</h3>
+      <dl class="collection-metadata-list">
+        <%= display_ds_values_as_dl_element("descMetadata", [:location,:repo_code], "Repository") %>
+        <%= display_ds_values_as_dl_element("descMetadata", :identifier, "ID") %>
+        <%= display_ds_values_as_dl_element("descMetadata", :clio, "CLIO ID") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:location, :shelf_locator], "Physical Location") %>
+        <%= display_ds_values_as_dl_element("descMetadata", :access_condition, "Access Notes") %>
+      </dl>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<% unless file_assets.hits.empty? %>
+    <table class='multipleEdit' id='file_assets'>
+      <tr>
+        <th>File</th>
+        <th></th>
+      </tr>
+   
+      <%= render :partial=>'resources/result', :collection=> file_assets %>
+			</table>
+<% end %>
+
+<% if !@document.nil? && editor? %>
+  <div id='uploader'>
+    <%= render :partial=>"resources/new"%>
+  </div>
+<% end %>

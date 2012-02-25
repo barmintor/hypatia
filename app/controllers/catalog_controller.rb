@@ -1,6 +1,7 @@
 class CatalogController < ApplicationController
   include Blacklight::Catalog
   include Hydra::Catalog
+  include Cul::Scv::Hydra::Controllers::Catalog
   helper :all # include all helpers, all the time
   
   # These before_filters apply the hydra access controls
@@ -12,7 +13,7 @@ class CatalogController < ApplicationController
   CatalogController.solr_search_params_logic << :exclude_unwanted_models
   before_filter :requirements, :only => [:edit_members,:add_relationships]
   before_filter :featured_collections, :only => [:index]
-
+  
   def edit_members
     q = build_lucene_query("\" AND NOT _query_:\"info\\\\:fedora/afmodel\\\\:HypatiaCollection")
     @response, @document_list = get_search_results(:q => q)

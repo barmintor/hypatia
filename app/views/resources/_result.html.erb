@@ -1,0 +1,19 @@
+<tr class="file_asset" id ="assets_<%= format_pid(result["id"]) %>" >  
+  <td>
+    <%= link_to result[solr_name("title", :text)], resource_path(result["id"]) %>
+  </td>
+  <td>
+	
+   <% if editor? %>
+    	<% if @container.nil? %>
+    		<% file_asset_url = resource_path(result["id"]) %>
+                <%= link_to("Edit", edit_catalog_path(result["id"]), :method => :get) %>
+                <% # link_to("Remove", asset_aggregate_path(:asset_id=>@document["id"], :id=>result["id"]), :method => :delete, :confirm => "Are you sure you want to remove this object?") %>
+    	<% else %>
+    		<% file_asset_url = asset_resource_path(@container.pid, result["id"]) %>
+                <%= link_to("Edit", edit_catalog_path(result["id"]), :method => :get) %>
+                <%= link_to("Delete", "/resources/" + result["id"] + "?container_id=" + @container.pid, :method => :delete, :confirm => "Are you sure you want to delete this file?") %>
+    	<% end %>
+   <% end %>
+  </td>
+</tr>

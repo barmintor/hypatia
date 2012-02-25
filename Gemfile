@@ -1,15 +1,15 @@
 source "http://rubygems.org"
 source 'http://gemcutter.org'
 
-gem 'rails', '~>3.0.10'
+gem 'rails', '3.0.11'
 
-gem 'active-fedora', '>=3.2.2'  
+gem 'active-fedora', '>=3.3.0'  
 gem 'bagit'
 gem 'blacklight', '~>3.1.2'
 gem 'builder'
 gem 'columnize'
 gem 'crack'
-gem "cul_scv_hydra", :git=>'git://github.com/cul/cul_om_scv.git', :branch=>'master'
+gem "cul_scv_hydra", :git=>'git://github.com/cul/cul_scv_hydra.git', :branch=>'master'
 gem 'curb', '0.7.15'
 gem 'database_cleaner'
 gem "devise", "~>1.5.3"
@@ -18,7 +18,7 @@ gem 'diff-lcs'
 gem 'facets', '2.9.2'
 gem 'haml'
 gem 'httparty'
-gem 'hydra-head', :git=>'git://github.com/barmintor/hydra-head.git', :branch=>'facets'
+gem 'hydra-head', :path=>'/Users/ba2213/Github/hydra-head', :branch=>'debug'
 gem 'jettywrapper', '~>1.2.0'
 gem 'json_pure', '>1.4.3'
 gem 'kaminari'

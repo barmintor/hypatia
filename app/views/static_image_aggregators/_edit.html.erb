@@ -1,0 +1,11 @@
+<% if !session[:scripts] %>
+  <%= render_previous_workflow_steps %>
+  <%= render_submission_workflow_step -%>
+<% else %>
+  <% result = break_me %>
+  <%= result.html_safe %>
+  <div class="all-steps-actions">
+    <button id="all_save_continue" name="all_save_continue">Save and Continue Editing</button>
+    <button id="all_save_finish" name="all_save_finish">Save and Finish</button>
+  </div>
+<% end %>

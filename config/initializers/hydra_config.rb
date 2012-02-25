@@ -51,5 +51,12 @@ if Hydra.respond_to?(:configure)
             :owner => "depositor_t",
             :embargo_release_date => "embargo_release_date_dt"
           }
+      # configure the local models and their workflows
+      static_image_steps = []
+      static_image_steps << {:name => "description", :edit_partial => "static_image_aggregators/description_form", :show_partial => "static_image_aggregators/show_description"}
+      static_image_steps << {:name => "files", :edit_partial => "shared/edit_resources", :show_partial => "shared/show_files"}
+      static_image_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
+      config[:submission_workflow][:static_image_aggregators] = static_image_steps
+      
   end
 end

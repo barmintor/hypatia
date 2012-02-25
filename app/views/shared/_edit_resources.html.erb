@@ -1,0 +1,17 @@
+<%- if params.has_key?(:number_of_files) or !@resources.hits.empty? -%>
+  <%= render :partial => "resources/index", :locals => { :resources => @resources } %>
+<%- end -%>
+<%= form_tag(upload_url, :class => "step") do -%>
+<div class="descMetadata metadata-section">
+  <h2 class="section-title">Resources</h2>
+  <div class="descMetadata metadata-subsection">
+
+  <%= label_tag "number_of_files", "Number of files add" %>
+  <%= select_tag("number_of_files", options_for_select((0...11).to_a) ) -%>
+  <%= hidden_field_tag(:wf_step, params[:wf_step], :id => "num_files_wf_step") %>
+  <%= hidden_field_tag(:new_asset, true, :id => "num_files_new_asset") if params[:new_asset] %>
+  <%= hidden_field_tag("container_id",params[:id], :id => "file_assets_id")%>
+  <%= submit_tag(submit_name, :name=>"continue")%>
+</div>
+</div>
+<%- end -%>

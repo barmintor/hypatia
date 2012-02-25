@@ -9,7 +9,8 @@ module ApplicationHelper
 
   # display the Solr values populated per the datastream model with dt and dd html tags
   def display_ds_values_as_dl_element(dsid, solr_fld_sym, display_label)
-    values = get_values_from_datastream(@document_fedora, dsid, [solr_fld_sym])
+    field_ptr = (solr_fld_sym.is_a? Array)? solr_fld_sym : [solr_fld_sym]
+    values = get_values_from_datastream(@document_fedora, dsid, field_ptr)
     unless values.first.empty?
       result = "<dt>#{display_label}</dt><dd>#{values.join(', ')}</dd>".html_safe
     end

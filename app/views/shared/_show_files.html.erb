@@ -21,7 +21,7 @@
                   <%= link_to(attributes[:label], asset_downloads_path(attributes[:pid], :download_id=>attributes[:dsid])) -%>
                 </td>
                 <td>
-                  <%= file_object["extent_t"] unless file_object["extent_t"].nil? %>
+                  <%= file_object["extent_s"] unless file_object["extent_s"].nil? %>
                 </td>
                 <td>
                   <%= attributes["mimeType"] if attributes.has_key?("mimeType") %>

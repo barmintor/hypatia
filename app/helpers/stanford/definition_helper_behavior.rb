@@ -37,7 +37,7 @@ module Stanford::DefinitionHelperBehavior
         end
       end
       text += "</dd>"
-      text
+      text.html_safe
     end
   end
 end
