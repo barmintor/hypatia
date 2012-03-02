@@ -1,0 +1,10 @@
+<%-
+  doc_title = (document_show_html_title.nil? || document_show_html_title.empty?) ? @document[:id] : document_show_html_title.first
+  @page_title = "#{doc_title} - #{application_name}" 
+-%>
+<%- sidebar_items << render("shared/show_sets") -%>
+<div class="document_viewer" id="cover_container">
+  <%= render :partial => 'content_aggregators/show_description' -%>
+  <%= render :partial => 'shared/show_members' -%>
+  <%= render :partial => 'shared/show_permissions' %>
+</div>

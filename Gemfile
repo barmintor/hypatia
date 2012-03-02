@@ -3,13 +3,13 @@ source 'http://gemcutter.org'
 
 gem 'rails', '3.0.11'
 
-gem 'active-fedora', '>=3.3.0'  
+gem 'active-fedora', :path => '/Users/ba2213/Github/active_fedora_fork' # '>=3.3.0'  
 gem 'bagit'
 gem 'blacklight', '~>3.1.2'
 gem 'builder'
 gem 'columnize'
 gem 'crack'
-gem "cul_scv_hydra", :git=>'git://github.com/cul/cul_scv_hydra.git', :branch=>'master'
+gem "cul_scv_hydra", :path => '/Users/ba2213/Github/cul_scv_hydra' # :git=>'git://github.com/cul/cul_scv_hydra.git', :branch=>'master'
 gem 'curb', '0.7.15'
 gem 'database_cleaner'
 gem "devise", "~>1.5.3"

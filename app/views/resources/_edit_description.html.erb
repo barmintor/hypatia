@@ -1,6 +1,6 @@
-<form id="descriptive_metadata" action="<%= url_for(:action=>"update", :controller=>"assets", :content_type=>"StaticImageAggregator")%>" method="post" data-resourceType="dc_asset" accept-charset="utf-8">
+<form id="descriptive_metadata" action="<%= url_for(:action=>"update", :controller=>"assets", :content_type=>"Resource")%>" method="post" data-resourceType="dc_asset" accept-charset="utf-8">
   <input type="hidden" name="_method" value="put"/>
-  <input class="content_type" type="hidden" name="content_type" value="mods_asset" />
+  <input class="content_type" type="hidden" name="content_type" value="resource" />
   
   <p id="title_field" class="fedora-text-field"><%= fedora_field_label("DC", [:title], "Title:") %>
     <%= fedora_text_field(@document_fedora,"DC", [:title], :multiple=>false, :required=>true) %></p>

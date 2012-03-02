@@ -1,5 +1,5 @@
 <div class="files metadata-section">
-  <h2 class="section-title">Files</h2>
+  <h2 class="section-title">Files/Resources</h2>
   <span class="show-hide" style="display:none;">Hide Section</span>
   <div class="toggle-section">
     <table id="file_assets" class="files">
@@ -12,22 +12,35 @@
       </thead>
       <tbody>
         <%- file_objects = @document_fedora.parts(:response_format=>:solr) -%>
-        <%- unless file_objects.hits.empty? -%>
+        <%- unless @resources.hits.empty? -%>
           <%- file_objects.each_with_index do |file_object, index| -%>
-            <%- attributes = get_file_attributes_from_fedora(file_object["id"]) -%>
+            <%- attributes = get_resource_attributes_from_fedora(file_object["id"]) -%>
             <%- unless attributes.nil? -%>
               <tr class="file_asset<%= cycle(" odd", " even") -%>" >
                 <td>
-                  <%= link_to(attributes[:label], asset_downloads_path(attributes[:pid], :download_id=>attributes[:dsid])) -%>
+	              <%= link_to(attributes[:label], catalog_path(attributes[:pid])) -%>
+                  <%= link_to("(download)", asset_downloads_path(attributes[:pid], :download_id=>attributes[:dsid])) -%>
                 </td>
                 <td>
                   <%= file_object["extent_s"] unless file_object["extent_s"].nil? %>
                 </td>
                 <td>
-                  <%= attributes["mimeType"] if attributes.has_key?("mimeType") %>
+                  <%= attributes[:mime_type] if attributes.has_key?(:mime_type) %>
                 </td>
               </tr>
             <%- end -%>
+          <%- end -%>
+        <%- else %>
+          <tr><th colspan="3">File Objects was empty! <%= @document_fedora %> : <%= @document_fedora.inner_object %></th></tr>
+          <%- query = @document_fedora.class.inbound_relationship_query(@document_fedora.pid, "parts") -%>
+          <tr><th colspan="3"><%= query %></th></tr>
+          <%- query = StaticImageAggregator.inbound_relationship_query(@document_fedora.pid, "parts") -%>
+          <tr><th colspan="3"><%= query %></th></tr>
+          <%- file_objects = ActiveFedora::SolrService.instance.conn.query(query, :rows=>25) -%>
+          <%- file_objects = ActiveFedora::SolrService.reify_solr_results(file_objects,{:load_from_solr=>true}) -%>
+          <tr><th colspan="3"><%= file_objects.inspect %></th></tr>
+          <%- @document_fedora.parts_ids.each do |part| -%>
+            <tr><td colspan="3">Part <%= part %></td></tr>
           <%- end -%>
         <%- end -%>
       </tbody>

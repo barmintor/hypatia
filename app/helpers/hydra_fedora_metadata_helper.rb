@@ -1,4 +1,5 @@
 module HydraFedoraMetadataHelper
+  unloadable
   include Hydra::HydraFedoraMetadataHelperBehavior
   # just testing out if we can easily add a :disabled option
   def fedora_text_field(resource, datastream_name, field_key, opts={})
@@ -24,6 +25,13 @@ module HydraFedoraMetadataHelper
     result << body.html_safe
   
     return result
+  end
+  
+  def options_for_value_map(key,keys_only=false)
+    values = Cul::Scv::Hydra::Solrizer::ValueMapper.default_value_maps[key]
+    options = [["Choose","",{:disabled=>"disabled"}]]
+    values.sort.each { |k,v| options << (keys_only ? [k,k] : [v,k])}
+    options
   end
 
 end

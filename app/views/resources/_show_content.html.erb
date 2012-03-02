@@ -1,0 +1,28 @@
+<div class="files metadata-section">
+  <h2 class="section-title">Content</h2>
+  <table id="file_assets" class="files">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Size</th>
+        <th>Mimetype</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%- attributes = get_resource_attributes_from_fedora(@document_fedora.pid) -%>
+      <%- unless attributes.nil? -%>
+        <tr class="file_asset<%= cycle(" odd", " even") -%>" >
+          <td>
+            <%= link_to(attributes[:label], asset_downloads_path(attributes[:pid], :download_id=>'CONTENT')) -%>
+          </td>
+          <td>
+            <%= attributes[:size] unless attributes[:size].nil? %>
+          </td>
+          <td>
+            <%= attributes[:mime_type] if attributes.has_key?(:mime_type) %>
+          </td>
+        </tr>
+      <%- end -%>
+    </tbody>
+  </table>
+</div>

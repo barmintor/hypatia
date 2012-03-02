@@ -1,12 +1,10 @@
 <div class="descMetadata metadata-section">
   <h2 class="section-title">Description</h2>
-  <%= link_to("(Click here to download MODS)", asset_downloads_path(params[:id], :download_id=>"descMetadata")) -%>
   <span class="show-hide" style="display:none;">Hide Section</span>
   <div class="toggle-section">
     <div class="descMetadata metadata-subsection">
       <h3 class="subsection-title">Description</h3>
       <dl class="collection-metadata-list">
-        <%= display_ds_values_as_dl_element("descMetadata", :title, "Title") %>
         <%= display_ds_values_as_dl_element("descMetadata", :abstract, "Abstract") %>
         <%= display_ds_values_as_dl_element("descMetadata", [:origin_info,:date], "Created") %>
         <%= display_ds_values_as_dl_element("descMetadata", [:subject,:topic], "Subject") %>

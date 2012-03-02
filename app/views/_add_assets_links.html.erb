@@ -3,13 +3,10 @@
   <ul id="select-item-list">
     <li><span class="disabled">Add a Collection</span></li>
     <li>
-      <%= link_to 'Add a Set', new_asset_path(:content_type=>'hypatia_set') %>
+      <%= link_to 'Add a Set', new_asset_path(:content_type=>'bag_aggregator') %>
     </li>
     <li>
-      <%= link_to 'Add a File Item', new_asset_path(:content_type=>'hypatia_ftk_item') %>
-    </li>
-    <li>
-      <%= link_to 'Add a Disk Image Item', new_asset_path(:content_type=>'hypatia_disk_image_item') %>
+      <%= link_to 'Add an Item', new_asset_path(:content_type=>'content_aggregator') %>
     </li>
     <li>
       <%= link_to 'Add an Image', new_asset_path(:content_type=>'static_image_aggregator') %>

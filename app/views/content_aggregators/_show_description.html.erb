@@ -6,7 +6,7 @@
     <div class="descMetadata metadata-subsection">
       <h3 class="subsection-title">Description</h3>
       <dl class="collection-metadata-list">
-        <%= display_ds_values_as_dl_element("descMetadata", :title, "Title") %>
+        <%= display_ds_values_as_dl_element("descMetadata", [:project,:project_title_info, :lib_project], "Project") %>
         <%= display_ds_values_as_dl_element("descMetadata", :abstract, "Abstract") %>
         <%= display_ds_values_as_dl_element("descMetadata", [:origin_info,:date], "Created") %>
         <%= display_ds_values_as_dl_element("descMetadata", [:subject,:topic], "Subject") %>

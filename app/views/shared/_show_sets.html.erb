@@ -7,17 +7,18 @@
     <ul>
 	  <% unless set_objects.nil? %>
         <% set_objects.each do |result| -%>
-          <li><%= link_to result[solr_name("title", :text)], catalog_path(:id=>result["id"]) %></li>
+          <li><%= link_to result[solr_name("title", :text)], catalog_path(:id=>result["id"]) || result["id"] %></li>
   		<% end -%>
 	  <% end -%>
 	  <% unless coll_objects.nil? %>
         <% coll_objects.each do |result| -%>
-          <li><%= link_to result[solr_name("title", :text)], catalog_path(:id=>result["id"]) %></li>
+          <li><%= link_to result[solr_name("title", :text)], catalog_path(:id=>result["id"]) || result["id"] %></li>
         <% end -%>
       <% end -%>
       <% unless containers.nil? %>
         <% containers.each do |result| -%>
-          <li><%= link_to result[solr_name("title", :text)], catalog_path(:id=>result["id"]) %></li>
+          <%- member_title = ((result[solr_name("title", :display)] and result[solr_name("title", :display)][0]))-%>
+          <li><%= link_to (member_title || result["id"]), catalog_path(:id=>result["id"]) %></li>
         <% end -%>
       <% end -%>
   	</ul>		

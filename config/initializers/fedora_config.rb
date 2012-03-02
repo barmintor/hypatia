@@ -1,4 +1,6 @@
 require 'active-fedora'
+require 'rdf/rdfxml'
+require 'rdf'
 #
 # Misc Config for SALT Application
 #
@@ -8,7 +10,6 @@ require 'active-fedora'
 # Among other things, it allows you to access Fedora and Solr (ActiveFedora's copy) as ActiveFedora.fedora and ActiveFedora.solr
 silence_warnings { ENABLE_SOLR_UPDATES=true }
 ActiveFedora.init
-
 #
 # Loads EAD descriptors 
 # Attempts to parse any xml files in lib/stanford/ead/

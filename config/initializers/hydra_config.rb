@@ -48,15 +48,28 @@ if Hydra.respond_to?(:configure)
             :discover => {:group =>"discover_access_group_t", :individual=>"discover_access_person_t"},
             :read => {:group =>"read_access_group_t", :individual=>"read_access_person_t"},
             :edit => {:group =>"edit_access_group_t", :individual=>"edit_access_person_t"},
+            :edit_members => {:group =>"edit_access_group_t", :individual=>"edit_access_person_t"},
             :owner => "depositor_t",
             :embargo_release_date => "embargo_release_date_dt"
           }
       # configure the local models and their workflows
+      bag_steps = []
+      bag_steps << {:name => "description", :edit_partial => "bag_aggregators/description_form", :show_partial => "bag_aggregators/show_description"}
+      bag_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
       static_image_steps = []
       static_image_steps << {:name => "description", :edit_partial => "static_image_aggregators/description_form", :show_partial => "static_image_aggregators/show_description"}
       static_image_steps << {:name => "files", :edit_partial => "shared/edit_resources", :show_partial => "shared/show_files"}
       static_image_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
+      content_steps = []
+      content_steps << {:name => "description", :edit_partial => "content_aggregators/description_form", :show_partial => "content_aggregators/show_description"}
+      content_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
+      resource_steps = []
+      resource_steps << {:name => "description", :edit_partial => "resources/description_form", :show_partial => "resources/show_description"}
+      resource_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
+      config[:submission_workflow][:bag_aggregators] = bag_steps
+      config[:submission_workflow][:content_aggregators] = content_steps
       config[:submission_workflow][:static_image_aggregators] = static_image_steps
+      config[:submission_workflow][:resources] = resource_steps
       
   end
 end

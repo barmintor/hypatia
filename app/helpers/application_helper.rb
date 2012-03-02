@@ -79,14 +79,14 @@ module ApplicationHelper
   def get_members_from_solr(document)
     af_base = load_af_instance_from_solr(document)
     the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first    
-    obj = the_model.load_instance(document[:id])
+    obj = af_base.adapt_to the_model
     return obj.members(:response_format=>:solr)
   end
   
   def get_parts_from_solr(document)
     af_base = load_af_instance_from_solr(document)
     the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first    
-    obj = the_model.load_instance(document[:id])
+    obj = af_base.adapt_to the_model
     return obj.parts(:response_format=>:solr)
   end
   
@@ -104,6 +104,20 @@ module ApplicationHelper
     if ds.has_key? "DS1"
       ds = ds["DS1"]
       {:pid => ds.pid, :dsid => ds.dsid, :label => ds.label, :mime_type => ds.mimeType}
+    else
+      {}
+    end
+  end
+
+  def get_resource_attributes_from_fedora(asset_id)
+    if asset_id == @document_fedora.pid
+      ds = @document_fedora.datastreams
+    else
+      ds = Resource.load_instance(asset_id).datastreams
+    end
+    if ds.has_key? "CONTENT"
+      ds = ds["CONTENT"]
+      {:pid => ds.pid, :dsid => ds.dsid, :label => ds.label, :mime_type => ds.mimeType, :size=>ds.dsSize}
     else
       {}
     end

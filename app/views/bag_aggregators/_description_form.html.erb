@@ -2,15 +2,19 @@
   <div class="descMetadata metadata-section">
     <h2 class="section-title">Description</h2>
     <div class="descMetadata metadata-subsection">
-      <h3 class="subsection-title">Image</h3>
+      <h3 class="subsection-title">Item</h3>
       <div>
         <p id="title_field" class="fedora-text-field">
-          <%= fedora_field_label("descMetadata", [{:main_title_info=>0},:main_title], "Title") %>
-          <%= fedora_text_field(@document_fedora,"descMetadata", [{:main_title_info=>0},:main_title], :multiple=>false, :required=>true ) %>
+          <%= fedora_field_label("descMetadata", [:main_title_info,:main_title], "Title") %>
+          <%= fedora_text_field(@document_fedora,"descMetadata", [:main_title_info,:main_title], :multiple=>false, :required=>true ) %>
         </p>
         <p id="extent_field" class="fedora-text-field">
-          <%= fedora_field_label("descMetadata", [{:physical_description=>0},:extent], "Extent") %>
-          <%= fedora_text_field(@document_fedora,"descMetadata", [{:physical_description=>0},:extent], :multiple=>false, :required=>false ) %>
+          <%= fedora_field_label("descMetadata", [:physical_description,:extent], "Extent") %>
+          <%= fedora_text_field(@document_fedora,"descMetadata", [:physical_description,:extent], :multiple=>false, :required=>false ) %>
+        </p>
+        <p id="extent_field" class="fedora-text-field">
+          <%= fedora_field_label("descMetadata", [:abstract], "Abstract") %>
+          <%= fedora_text_area(@document_fedora,"descMetadata", [:abstract], :multiple=>false, :required=>false ) %>
         </p>
       </div>
     </div>
@@ -18,8 +22,8 @@
       <h3 class="subsection-title">Repository</h3>
       <div>
         <p id="local_id_field" class="fedora-text-field">
-          <%= fedora_field_label("descMetadata", [{:identifier=>0}], "Unique Local Identifier") %>
-          <%= fedora_text_field(@document_fedora,"descMetadata", [{:identifier=>0}], :multiple=>false, :required=>false, :disabled=>false ) %>
+          <%= fedora_field_label("descMetadata", [:identifier], "Unique Local Identifier") %>
+          <%= fedora_text_field(@document_fedora,"descMetadata", [:identifier], :multiple=>false, :required=>false, :disabled=>false ) %>
         </p>
       </div>
     </div>

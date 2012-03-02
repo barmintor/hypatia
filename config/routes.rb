@@ -6,9 +6,10 @@ Hypatia::Application.routes.draw do
   HydraHead.add_routes(self)
   DeviseWind.add_routes(self)
   resources :users, :only => :show
-
-  match 'catalog/:id/edit_members' => "catalog#edit_members"
-  match 'catalog/:id/update_members' => "catalog#update_members"
+  resources :resources
+  match 'catalog/:id/edit' => "catalog#edit", :as => 'catalog_edit'
+  match 'catalog/:id/edit_members' => "catalog#edit_members", :as => 'catalog_edit_members'
+  match 'catalog/:id/update_members' => "catalog#update_members", :as => 'catalog_update_members'
   match 'assets/:asset_id/downloads' => "assets#download"
 
   # default routes

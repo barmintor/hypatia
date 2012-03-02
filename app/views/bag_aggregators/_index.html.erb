@@ -1,0 +1,11 @@
+<div class="document <%= cycle("even","odd") %>">
+  <%= render :partial => "catalog/folder_control", :locals=>{:document=>document} %>
+  <h3 class="document-title"><%= link_to_document(document, :label => Blacklight.config[:show][:heading].to_sym, :counter => (counter + 1 + @response.params[:start].to_i)) %></h3>
+  <dl>
+    <%= render_field_from_index(document,"title_display", "Title") %>
+    <%= render_field_from_index(document,"lib_repo_facet", "Repository") %>
+    <%= render_field_from_index(document,"lib_project_display", "Project") %>
+    <%= render_field_from_index(document,"lib_collection_display", "Collection") %>
+    <%= render_field_from_index(document,"date_created_display", "Date Created") %>
+  </dl>
+</div>

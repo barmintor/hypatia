@@ -11,26 +11,61 @@ class CatalogController < ApplicationController
   CatalogController.solr_search_params_logic << :add_access_controls_to_solr_params
   # This filters out objects that you want to exclude from search results, like FileAssets
   CatalogController.solr_search_params_logic << :exclude_unwanted_models
-  before_filter :requirements, :only => [:edit_members,:add_relationships]
+
+  before_filter :load_fedora_document, :load_resources, :only => [:edit, :show, :edit_members]
   before_filter :featured_collections, :only => [:index]
+  
+  def exclude_unwanted_models(solr_parameters, user_parameters)
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/afmodel:HypatiaCollection\""
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/afmodel:FileAsset\""
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:Resource\""
+  end
+  
+  def exclude_member_types(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    if @document_fedora.is_a? StaticImageAggregator or @document_fedora.is_a? StaticAudioAggregator
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:StaticImageAggregator\""
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:StaticAudioAggregator\""
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:ContentAggregator\""
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:BagAggregator\""
+    end
+    if @document_fedora.is_a? ContentAggregator or @document_fedora.is_a? BagAggregator
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:Resource\""
+    end
+    if @document_fedora.is_a? ContentAggregator
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:ContentAggregator\""
+      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:BagAggregator\""
+    end
+  end
+  
+  def exclude_document(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "-id:\"#{@document_fedora.pid}\""
+  end
   
   def edit_members
     q = build_lucene_query("\" AND NOT _query_:\"info\\\\:fedora/afmodel\\\\:HypatiaCollection")
-    @response, @document_list = get_search_results(:q => q)
+    puts "search query: #{q}"
+    search_params = solr_search_params
+    user_params = {}
+    exclude_document(search_params, user_params)
+    exclude_member_types(search_params, user_params)
+    apply_gated_discovery(search_params, user_params)
+    @response, @document_list = get_search_results(user_params,search_params)
     @folder_response, @folder_list = get_solr_response_for_field_values("id",session[:folder_document_ids] || [])
   end
   
   def update_members
     status_text = ""
     parent_doc = load_fedora_doc_from_id(params[:id])
-    relationship = parent_doc.is_a?(HypatiaCollection) ? :is_member_of_collection : :is_member_of
     child_ids = params[:child_ids] || []
     remove_ids = parent_doc.members_ids - child_ids
     child_ids.each do |cid|
       unless parent_doc.members_ids.include?(cid) #don't add a relationship if we already have one.
         child = load_fedora_doc_from_id(cid)
-        child.add_relationship(relationship,params[:id])
-        status_text << "Added #{relationship} relationship of #{cid} to #{params[:id]}"
+        child.add_relationship(:cul_member_of,"info:fedora/#{params[:id]}")
+        status_text << "Added #{:cul_member_of} relationship of #{cid} to #{params[:id]}"
         child.save
       end
     end
@@ -87,6 +122,10 @@ class CatalogController < ApplicationController
       enforce_edit_permissions(opts)
     end
     
+    def enforce_edit_members_permissions(opts={})
+      enforce_edit_permissions(opts)
+    end
+    
     def add_access_controls_to_solr_params(solr_parameters, user_parameters)
       apply_gated_discovery(solr_parameters, user_parameters)
       if !reader? 
@@ -98,7 +137,6 @@ class CatalogController < ApplicationController
   
   def requirements
     require_solr
-    require_fedora
   end
   
   def load_fedora_doc_from_id(id)

@@ -4,7 +4,8 @@
     <h2 class="sidebar-title">In this Collection:</h2>
     <ul>
       <%- sort_by_display_name(member_objects.hits).each do |result| -%>
-        <li><%= link_to result[solr_name("display_name", :string)], catalog_path(:id=>result["id"]) %></li>
+        <%- member_title = ((result[solr_name("title", :display)] and result[solr_name("title", :display)][0]))-%>
+        <li><%= link_to (member_title || result["id"]), catalog_path(:id=>result["id"]) %></li>
 			<%- end -%>
 		</ul>		
 		<% if controller.action_name == "edit" && editor? %>
