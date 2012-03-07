@@ -117,9 +117,13 @@ module ApplicationHelper
     end
     if ds.has_key? "CONTENT"
       ds = ds["CONTENT"]
-      {:pid => ds.pid, :dsid => ds.dsid, :label => ds.label, :mime_type => ds.mimeType, :size=>ds.dsSize}
+      atts = {:pid => ds.pid, :dsid => ds.dsid, :label => ds.label, :mime_type => ds.mimeType, :size=>ds.dsSize}
+      if atts[:label].nil? or atts[:label] == ""
+        atts[:label] = ds.pid
+      end
+      return atts
     else
-      {}
+      return {}
     end
   end
   
