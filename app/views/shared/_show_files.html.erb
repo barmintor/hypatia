@@ -31,17 +31,7 @@
             <%- end -%>
           <%- end -%>
         <%- else %>
-          <tr><th colspan="3">File Objects was empty! <%= @document_fedora %> : <%= @document_fedora.inner_object %></th></tr>
-          <%- query = @document_fedora.class.inbound_relationship_query(@document_fedora.pid, "parts") -%>
-          <tr><th colspan="3"><%= query %></th></tr>
-          <%- query = StaticImageAggregator.inbound_relationship_query(@document_fedora.pid, "parts") -%>
-          <tr><th colspan="3"><%= query %></th></tr>
-          <%- file_objects = ActiveFedora::SolrService.instance.conn.query(query, :rows=>25) -%>
-          <%- file_objects = ActiveFedora::SolrService.reify_solr_results(file_objects,{:load_from_solr=>true}) -%>
-          <tr><th colspan="3"><%= file_objects.inspect %></th></tr>
-          <%- @document_fedora.parts_ids.each do |part| -%>
-            <tr><td colspan="3">Part <%= part %></td></tr>
-          <%- end -%>
+          <tr><td colspan="3">No child objects</td></tr>
         <%- end -%>
       </tbody>
     </table>

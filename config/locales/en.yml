@@ -7,6 +7,10 @@ en:
   "info:fedora/afmodel:HypatiaCollection" : "Collections"
   "info:fedora/afmodel:HypatiaDiskImageItem" : "Disk Images"
   "info:fedora/afmodel:HypatiaSet" : "Sets"
+  "info:fedora/ldpd:StaticImageAggregator" : "Images"
+  "info:fedora/ldpd:ContentAggregator" : "Items"
+  "info:fedora/ldpd:BagAggregator" : "Sets"
+  "info:fedora/ldpd:Resource" : "File Resources"
   activerecord:
     attributes:
       user:

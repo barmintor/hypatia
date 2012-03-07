@@ -1,14 +1,7 @@
 GIT
-  remote: git://github.com/cul/devise_wind.git
-  revision: 3f0a34cb44c6d8335da7aa48e8e55c6d4d9c02e3
-  branch: master
-  specs:
-    devise_wind (0.1)
-      devise (>= 1.5.3)
-      rails (~> 3.0.10)
-
-PATH
-  remote: /Users/ba2213/Github/active_fedora_fork
+  remote: git://github.com/barmintor/active_fedora.git
+  revision: c5e2ca3557c52effd27074fb2ff887622f4485ed
+  branch: hydra-749
   specs:
     active-fedora (3.3.2)
       activeresource (>= 3.0.0)
@@ -26,36 +19,76 @@ PATH
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
 
-PATH
-  remote: /Users/ba2213/Github/cul_scv_hydra
+GIT
+  remote: git://github.com/barmintor/hydra-head.git
+  revision: 493e29ae358d2b651234500ac28b8be9c7f18381
+  branch: facets
   specs:
-    cul_scv_hydra (0.2.0)
+    hydra-head (3.2.2)
+      RedCloth (= 4.2.3)
+      active-fedora (>= 3.2.2)
+      blacklight (~> 3.1.2)
+      block_helpers
+      builder (= 2.1.2)
+      columnize
+      crack
+      curb (= 0.7.15)
+      database_cleaner
+      devise
+      diff-lcs
+      facets (= 2.9.2)
+      haml
+      httparty
+      json_pure (> 1.4.3)
+      launchy
+      linecache
+      mediashelf-loggable (= 0.4.7)
+      mediashelf-loggable (>= 0.4.7)
+      mime-types
+      multipart-post
+      nokogiri
+      om (>= 1.2.3)
+      rack
+      rack-test
+      rails (~> 3.0.10)
+      rake
+      sanitize
+      solr-ruby
+      solrizer (>= 1.1.0)
+      solrizer-fedora (>= 1.2.2)
+      sqlite3-ruby (~> 1.2.5)
+      term-ansicolor
+      trollop
+      will_paginate
+      xml-simple
+
+GIT
+  remote: git://github.com/cul/cul_scv_hydra.git
+  revision: 938f4520eaeae2d11ac70d4894dc37d93532e2ca
+  branch: master
+  specs:
+    cul_scv_hydra (0.3.0)
       active-fedora (~> 3.3.0)
       activemodel (~> 3.0.10)
       activeresource (~> 3.0.10)
       activesupport (~> 3.0.10)
       blacklight (~> 3.1.2)
       cul_image_props
-      hydra-head (~> 3.3.0)
-      mediashelf-loggable (~> 0.4.7)
+      mediashelf-loggable (>= 0.4.7)
       nokogiri (>= 1.4.2)
       om (>= 1.2.4)
       rails (~> 3.0.10)
       rubydora (>= 0.2.6)
       solrizer (>= 1.1.2)
 
-PATH
-  remote: /Users/ba2213/Github/hydra-head
+GIT
+  remote: git://github.com/cul/devise_wind.git
+  revision: d1469032bb811604bf4b0b3c3b00b415f6e63197
+  branch: master
   specs:
-    hydra-head (3.3.0)
-      RedCloth (= 4.2.3)
-      active-fedora (>= 3.3.0)
-      blacklight (~> 3.1.2)
-      block_helpers
-      devise
+    devise_wind (0.1)
+      devise (>= 1.5.3)
       rails (~> 3.0.10)
-      sanitize
-      solrizer-fedora (>= 1.2.2)
 
 GEM
   remote: http://rubygems.org/
@@ -142,7 +175,7 @@ GEM
     erubis (2.6.6)
       abstract (>= 1.0.0)
     facets (2.9.2)
-    factory_girl (2.6.0)
+    factory_girl (2.6.1)
       activesupport (>= 2.3.9)
     fastercsv (1.5.4)
     ffi (1.0.11)
@@ -179,13 +212,13 @@ GEM
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    marc (0.4.3)
-    mediashelf-loggable (0.4.9)
+    marc (0.4.4)
+    mediashelf-loggable (0.4.7)
     metaclass (0.0.1)
     mime-types (1.17.2)
-    mocha (0.10.4)
+    mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.0.4)
+    multi_json (1.1.0)
     multi_xml (0.4.1)
     multipart-post (1.1.2)
     net-ldap (0.3.1)
@@ -249,7 +282,7 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    rubydora (0.5.3)
+    rubydora (0.5.4)
       activemodel
       activesupport
       fastercsv
@@ -268,10 +301,10 @@ GEM
       nokogiri (>= 1.4.0)
       nori (~> 1.1)
       wasabi (~> 2.1)
-    selenium-webdriver (2.19.0)
+    selenium-webdriver (2.20.0)
       childprocess (>= 0.2.5)
-      ffi (~> 1.0.9)
-      multi_json (~> 1.0.4)
+      ffi (~> 1.0)
+      multi_json (~> 1.0)
       rubyzip
     solr-ruby (0.0.8)
     solrizer (1.2.0)
@@ -297,13 +330,14 @@ GEM
       polyglot
       polyglot (>= 0.3.1)
     trollop (1.16.2)
-    tzinfo (0.3.31)
-    unicode (0.4.1)
+    tzinfo (0.3.32)
+    unicode (0.4.2)
     validatable (1.6.7)
     warden (1.1.1)
       rack (>= 1.0)
     wasabi (2.1.0)
       nokogiri (>= 1.4.0)
+    will_paginate (3.0.3)
     xml-simple (1.1.1)
     xpath (0.1.4)
       nokogiri (~> 1.3)

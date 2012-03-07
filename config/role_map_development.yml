@@ -1,8 +1,18 @@
+staff:
+    - cul.cunix.local:columbia.edu
+    - cul2.cunix.local:columbia.edu
+dpts:
+    - ldpd.cunix.local:columbia.edu
+    - lito.cunix.local:columbia.edu
+    - cdrs.cunix.local:columbia.edu
 archivist:
-  - archivist1
-donor:
-  - donor1
-researcher:
-  - researcher1
-patron:
-  - patron1
+    - ldpd.cunix.local:columbia.edu
+    - dortiz
+    - ds2057
+    - eh2124
+    - ejs2121
+    - jeg2
+    - la2272
+    - spd1
+    - ba2213
+    - rlb179

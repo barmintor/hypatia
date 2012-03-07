@@ -65,6 +65,7 @@ if Hydra.respond_to?(:configure)
       content_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
       resource_steps = []
       resource_steps << {:name => "description", :edit_partial => "resources/description_form", :show_partial => "resources/show_description"}
+      resource_steps << {:name => "content", :edit_partial => "resources/replace", :show_partial => "resources/show_content"}
       resource_steps << {:name => "permissions",     :edit_partial => "permissions/permissions_form", :show_partial => "shared/show_permissions"}
       config[:submission_workflow][:bag_aggregators] = bag_steps
       config[:submission_workflow][:content_aggregators] = content_steps

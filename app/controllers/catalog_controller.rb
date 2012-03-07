@@ -12,14 +12,17 @@ class CatalogController < ApplicationController
   # This filters out objects that you want to exclude from search results, like FileAssets
   CatalogController.solr_search_params_logic << :exclude_unwanted_models
 
-  before_filter :load_fedora_document, :load_resources, :only => [:edit, :show, :edit_members]
+  before_filter :load_fedora_document, :only => [:edit, :show, :edit_members]
+  before_filter :load_resources, :only => [:edit, :show, :edit_members]
   before_filter :featured_collections, :only => [:index]
   
   def exclude_unwanted_models(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "-has_model_s:\"info:fedora/afmodel:HypatiaCollection\""
       solr_parameters[:fq] << "-has_model_s:\"info:fedora/afmodel:FileAsset\""
-      solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:Resource\""
+      unless @document_fedora and @document_fedora.is_a? StaticImageAggregator
+        solr_parameters[:fq] << "-has_model_s:\"info:fedora/ldpd:Resource\""
+      end
   end
   
   def exclude_member_types(solr_parameters, user_parameters)

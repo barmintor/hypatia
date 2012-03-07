@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
+  include Hydra::UI::Controller
   before_filter :verify_user, :only => :show # can't show without a logged in user
-  
   def show
   end
   
@@ -16,6 +16,10 @@ class UsersController < ApplicationController
     else
       render :action => "new"
     end    
+  end
+  
+  def load_css
+      stylesheet_links << ["hydra/html_refactor", {:media=>"all"}]
   end
         
   protected

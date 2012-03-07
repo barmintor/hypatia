@@ -54,3 +54,5 @@
     :extent: extent
   http://www.w3.org/1999/02/22-rdf-syntax-ns#:
     :rdf_type: type
+  http://creativecommons.org/ns#:
+    :license:  license

@@ -1,0 +1,26 @@
+<% member_objects = @document_fedora.parts(:response_format=>:solr) -%>
+<% if !member_objects.hits.empty? -%>
+  <div class="sets members sidebar-section<%= " first" if (!@document_fedora.respond_to?(:containers) or @document_fedora.containers(:response_format=>:solr).hits.empty?) %>">
+    <h2 class="sidebar-title">Parts of this Object:</h2>
+    <ul>
+      <%- sort_by_display_name(member_objects.hits).each do |result| -%>
+        <%- member_title = ((result[solr_name("title", :display)] and result[solr_name("title", :display)][0]))-%>
+        <li><%= link_to (member_title || result["source_t"] || result["id"]), catalog_path(:id=>result["id"]) %></li>
+			<%- end -%>
+		</ul>		
+		<% if controller.action_name == "edit" && editor? %>
+		  <a class="edit-relationships" href="edit_members">Edit Relationships &#x2192;</a>
+		<% end %>
+	</div>	
+<%- elsif controller.action_name == "edit" && editor? -%>
+  <div class="sets members sidebar-section<%= " first" if (!@document_fedora.respond_to?(:containers) or @document_fedora.containers(:response_format=>:solr).hits.empty?) %>">
+    <a class="edit-relationships" href="edit_members">Edit Relationships &#x2192;</a>
+  </div>
+<%- else -%>
+  <div class="debug sidebar-section">
+	  <ul>
+		<li>controller.action_name <%= controller.action_name.html_safe -%></li>
+		<li>editor? <%= editor? -%></li>
+	  </ul>
+  </div>
+<% end -%>

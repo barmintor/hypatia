@@ -1,0 +1,22 @@
+<%= form_tag(url_for(:controller=>"assets", :action=>"update", :id=>params[:id]), :class => "step") do -%>
+  <input type="hidden" name="_method" value="put"/>
+  <input class="content_type" type="hidden" name="content_type" value="resource" />
+  
+  <p id="title_field" class="fedora-text-field">
+    <%= fedora_field_label("DC", [:title], "Title:") %>
+    <%= fedora_text_field(@document_fedora,"DC", [:title], :multiple=>false, :required=>true) %>
+  </p>
+  <p id="language_field" class="fedora-text-field">
+    <%= fedora_field_label("DC", [:identifier], "Identifier:") %>
+    <%= fedora_text_field(@document_fedora, "DC", [:identifier], :multiple=>true, :required=>false ) %>
+  </p>  
+  <p id="language_field" class="fedora-text-field">
+    <%= fedora_field_label("DC", [:description], "Description:") %>
+    <%= fedora_text_field(@document_fedora, "DC", [:description], :multiple=>false, :required=>false ) %>
+  </p>  
+  <%= hidden_field_tag("_method","put", :id=>"description_method") %>
+  <%= hidden_field_tag(:wf_step, params[:wf_step], :id => "description_wf_step") %>
+  <%= hidden_field_tag(:new_asset, true, :id => "description_new_asset") if params[:new_asset] %>
+  <%= hidden_field_tag(:content_type,"resource", :id => "description_content_type") %>
+  <%= submit_tag("Save Description", :name=>"finish", :class=>"save-submit") %>
+<%- end -%>

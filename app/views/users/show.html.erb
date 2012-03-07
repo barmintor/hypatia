@@ -14,14 +14,7 @@
   
     <dt>Bookmarks</dt>
     <dd><%= link_to 'view', bookmarks_path %></dd>
-
-    <dt>Checkout Items</dt>
-    <dd>None</dd>
-
-    <dt>On Hold</dt>
-    <dd>None</dd>
-
-    <dt>Fines and Charges</dt>
-    <dd>None</dd>
+    <dt>Roles</dt>
+    <dd><%= current_user.groups.join(", ").html_safe -%></dd>
 
 </dl>

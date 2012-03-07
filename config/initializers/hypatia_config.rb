@@ -9,7 +9,7 @@ Blacklight.configure(:shared) do |config|
   # solr field values given special treatment in the show (single result) view
   config[:show] = {
    :html_title => "title_t",
-   :heading => "display_name_display",
+   :heading => "title_display",
    :display_type => "has_model_s"
   }
 
@@ -31,7 +31,9 @@ Blacklight.configure(:shared) do |config|
      "creator_facet",
      "filetype_facet",
      "topic_facet",
-     "has_model_s"
+     "has_model_s",
+     "lib_project_facet",
+     "lib_repo_facet"
      ]),
    :labels => {
      "repository_facet"=>"Repository",
@@ -41,7 +43,9 @@ Blacklight.configure(:shared) do |config|
      "creator_facet"=>"Creator",
      "filetype_facet"=>"Filetype",
      "topic_facet"=>"Subject",
-     "has_model_s"=>"Object Type"
+     "has_model_s"=>"Object Type",
+     "lib_project_facet" => "Project",
+     "lib_repo_facet" => "Repository"
    },
 
    :limits=> {"repository_facet"=>100,
@@ -51,7 +55,9 @@ Blacklight.configure(:shared) do |config|
               "creator_facet"=>10,
               "filetype_facet"=>10,
               "topic_facet"=>10,
-              "has_model_s"=>10
+              "has_model_s"=>10,
+              "lib_project_facet" =>10,
+              "lib_repo_facet" => 10
              }
   }
 

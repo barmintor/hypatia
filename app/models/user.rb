@@ -14,7 +14,8 @@ class User < ActiveRecord::Base
   attr_accessible :login, :email, :password, :password_confirmation, :remember_me
 
   validates_uniqueness_of :login, :email, :case_sensitive => false
-
+  has_and_belongs_to_many :roles
+  
   before_validation(:default_email, :on => :create) 
   before_validation(:generate_password, :on => :create) 
   before_create :set_personal_info_via_ldap
@@ -71,7 +72,20 @@ class User < ActiveRecord::Base
 
     return self
   end
-
+  
+  def affiliations=(affils)
+    syms = (affils.collect {|affil| (affil.is_a? Symbol)? affil : affil.to_sym})
+    syms << self.login.to_sym
+    
+    roles = syms.inject([]) {|memo, sym| (memo << sym).concat(RoleMapper.roles(sym.to_s).collect {|x| x.to_sym})}
+    roles.uniq!
+    self.roles = roles.collect {|role_sym| Role.find_or_create_by_role_sym(role_sym)}
+  end
+  
+  def groups
+    self.roles.collect {|role| role.role_sym.to_s}
+  end
+  
   protected
   def self.find_for_database_authentication(conditions)
     value = conditions.dup.delete(:login)

@@ -13,7 +13,7 @@ Blacklight.do_folder_toggle_behavior = function(){};
 
 Blacklight.do_facet_expand_contract_behavior = function(){};
 
-HydraHead = {validation: true, combinedEdit: true, autoSave: true};
+HydraHead = {validation: true, combinedEdit: true, autoSave: false};
 
 // Load appropriate Hydra-Head functions when document is ready
 $(document).ready(function() {

@@ -29,6 +29,7 @@ class ApplicationController < ActionController::Base
   
   def inject_assets
     stylesheet_links << ["http://fonts.googleapis.com/css?family=Copse|Open+Sans:300,400,600|Lato:700", "hypatia", {:media=>"all"}]
+    stylesheet_links << ["hydra/html_refactor", {:media=>"all"}]
     javascript_includes << ["hypatia"]
   end
 end

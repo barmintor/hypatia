@@ -1,14 +1,13 @@
-<%- field_tag_options = defined?(uploader_options) ? uploader_options : {} %>
+<%- field_tag_options = defined?(uploader_options) ? uploader_options : {:id => @document_fedora.pid} %>
 <%- container_content_type_param = defined?(container_content_type) ? "?container_content_type=#{container_content_type}" : "" %>
+<%= render :partial => "resources/show_content" %>
 <div id="uploader-contents">
     
     <!-- This form will be progressively enhanced by the Fluid Uploader component. -->    
-    <form method="post" enctype="multipart/form-data" class="uploader-form" action="<%=h upload_url(true) %>">
-        <input type="hidden" name="container_id" value="<%=h container_id %>"/>
-        <%= hidden_field_tag("container_content_type", container_content_type) if defined?(container_content_type) %>
-        <p>Browse to upload a file.</p>
-        <!-- <input name="Filedata-orig" type="file" /> -->
+	<%= form_tag(resource_path(params[:id]), :method=>"put",:enctype=>"multipart/form-data", :class=>"uploader-form step") do -%>
+        <%= hidden_field_tag("content_type", "resource") %>
+        <p>Browse to upload and replace file content.</p>
         <%= file_field_tag "Filedata", field_tag_options %>
-        <p><input type="submit" value="Upload File"/></p>
-    </form>
+	    <p><%= submit_tag(submit_name)%></p>
+    <%- end -%>
 </div>

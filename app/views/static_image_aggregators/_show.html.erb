@@ -3,6 +3,7 @@
   @page_title = "#{doc_title} - #{application_name}" 
 -%>
 <%- sidebar_items << render("shared/show_sets") -%>
+<%- sidebar_items << render("shared/show_parts") -%>
 <div class="document_viewer" id="cover_container">
   <%= render :partial => 'static_image_aggregators/show_description' -%>
   <%= render :partial => 'shared/show_files' -%>
