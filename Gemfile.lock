@@ -64,7 +64,7 @@ GIT
 
 GIT
   remote: git://github.com/cul/cul_scv_hydra.git
-  revision: 938f4520eaeae2d11ac70d4894dc37d93532e2ca
+  revision: 59258e4285cf1ab319e9128dc5d10fc6cc2e1e9d
   branch: master
   specs:
     cul_scv_hydra (0.3.0)

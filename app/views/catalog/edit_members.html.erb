@@ -24,7 +24,7 @@
     <ul id="item-list">
       <%- @document_list.each do |doc| -%>
         <%- unless member_objects.any? { |obj| obj["id"] === doc["id"] || obj["id"] === params[:id] } -%>
-          <li class="item" id="<%= doc["id"] %>"><%= doc[solr_name("title", :display)] %> <%= link_to "Info", catalog_path(:id=>doc["id"]), :target => "_blank" %></li>
+          <li class="item" id="<%= doc["id"] %>"><%= doc["title_display"] || doc["id"] %> <%= link_to "Info", catalog_path(:id=>doc["id"]), :target => "_blank" %></li>
         <%- end -%>
       <%- end -%>
     </ul>
@@ -41,7 +41,7 @@
       <p class="no-relationship-items">No Marked Items</p>
     <%- else -%>
       <%- member_objects.each do |member| -%>
-        <li class="member" id="<%= member["id"] %>"><%= member[solr_name("title", :string)] %> <%= link_to "Info", catalog_path(:id=>member["id"]), :target => "_blank" %> <a href="#" class="remove-relationship">Remove</a></li>
+        <li class="member" id="<%= member["id"] %>"><%= member["title_display"] || member["id"] %> <%= link_to "Info", catalog_path(:id=>member["id"]), :target => "_blank" %> <a href="#" class="remove-relationship">Remove</a></li>
       <%- end -%>
     <%- end -%>	
   </ul>	
