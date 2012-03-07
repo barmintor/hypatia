@@ -4,7 +4,7 @@
     <h2 class="sidebar-title">Parts of this Object:</h2>
     <ul>
       <%- sort_by_display_name(member_objects.hits).each do |result| -%>
-        <%- member_title = ((result[solr_name("title", :display)] and result[solr_name("title", :display)][0]))-%>
+        <%- member_title = ((result["title_display"]))-%>
         <li><%= link_to (member_title || result["source_t"] || result["id"]), catalog_path(:id=>result["id"]) %></li>
 			<%- end -%>
 		</ul>		
