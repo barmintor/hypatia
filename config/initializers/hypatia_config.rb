@@ -8,14 +8,15 @@ Blacklight.configure(:shared) do |config|
 
   # solr field values given special treatment in the show (single result) view
   config[:show] = {
-   :html_title => "title_t",
+   :show_link => "title_display",
+   :html_title => "title_display",
    :heading => "title_display",
    :display_type => "has_model_s"
   }
 
   # solr fld values given special treatment in the index (search results) view
   config[:index] = {
-   :show_link => "title_facet",
+   :show_link => "title_display",
    :num_per_page => 40,
    :record_display_type => "id"
   }

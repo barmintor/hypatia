@@ -4,6 +4,7 @@
 -%>
 <%- sidebar_items << render("shared/show_sets") -%>
 <div class="document_viewer" id="cover_container">
+  <%= render :partial => 'catalog/bookmark_control', :locals => {:document=>@document}-%>
   <%= render :partial => 'content_aggregators/show_description' -%>
   <%= render :partial => 'shared/show_members' -%>
   <%= render :partial => 'shared/show_permissions' %>

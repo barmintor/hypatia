@@ -16,7 +16,16 @@
       <%- end -%>
     </ul>
   <%- end -%>
-
+  <h2 class="list-title">Bookmarked Items</h2>
+  <%- if @bookmarks.blank? %>
+    <p class="no-relationship-items">No Bookmarked Items</p>
+  <%- else -%>
+    <ul id="marked-list">
+	  <%- @bookmarks.each do |marked|%>
+        <li class="marked" id="<%= marked["id"] %>"><%= marked.title %> <%= link_to "Info", catalog_path(:id=>marked.document_id), :target => "_blank" %></li>
+	  <%- end -%>
+    </ul>
+  <%- end -%>
   <h2 class="list-title">Other Available Items</h2>
   <%- if @document_list.blank? -%>
     <p class="no-relationship-items">No Other Available Items</p>

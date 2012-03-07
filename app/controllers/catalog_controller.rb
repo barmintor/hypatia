@@ -14,6 +14,7 @@ class CatalogController < ApplicationController
 
   before_filter :load_fedora_document, :only => [:edit, :show, :edit_members]
   before_filter :load_resources, :only => [:edit, :show, :edit_members]
+  before_filter :load_bookmarks, :only => [:edit_members]
   before_filter :featured_collections, :only => [:index]
   
   def exclude_unwanted_models(solr_parameters, user_parameters)
@@ -149,5 +150,9 @@ class CatalogController < ApplicationController
       the_model = DcDocument
     end
     return af_base.adapt_to(the_model)
+  end
+  
+  def load_bookmarks
+    @bookmarks = current_user.bookmarks.page(params[:page])
   end
 end
