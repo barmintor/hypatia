@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
   wind_host "wind.columbia.edu"
   wind_service "culscv"
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :login, :email, :password, :password_confirmation, :remember_me
+  attr_accessible :login, :email, :password, :password_confirmation, :remember_me, :password_salt
 
   validates_uniqueness_of :login, :email, :case_sensitive => false
   has_and_belongs_to_many :roles
@@ -46,7 +46,7 @@ class User < ActiveRecord::Base
   end
   
   def generate_password
-    self.password = ActiveSupport::SecureRandom.base64(8)
+    self.password = SecureRandom.base64(8)
   end
   
   def set_personal_info_via_ldap

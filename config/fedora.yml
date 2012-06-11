@@ -1,5 +1,8 @@
 development:
-  url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora
+  url: https://sayers.cul.columbia.edu:8443/fedora
+  user: fedoraAdmin
+  password: f+BULUS*^
+#  url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora
 test: &TEST  
   url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora
 production:

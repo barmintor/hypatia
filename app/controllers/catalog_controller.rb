@@ -140,7 +140,6 @@ class CatalogController < ApplicationController
   protected
   
   def requirements
-    require_solr
   end
   
   def load_fedora_doc_from_id(id)

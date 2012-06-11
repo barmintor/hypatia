@@ -17,9 +17,6 @@ if Hydra.respond_to?(:configure)
     config[:file_asset_types] = {
       :default => FileAsset, 
       :extension_mappings => {
-        AudioAsset => [".wav", ".mp3", ".aiff"] ,
-        VideoAsset => [".mov", ".flv", ".mp4", ".m4v"] ,
-        ImageAsset => [".jpeg", ".jpg", ".gif", ".png"] 
       }
     }
     config[:submission_workflow] = {

@@ -3,13 +3,13 @@
   <ul id="select-item-list">
     <li><span class="disabled">Add a Collection</span></li>
     <li>
-      <%= link_to 'Add a Set', new_asset_path(:content_type=>'bag_aggregator') %>
+      <%= link_to 'Add a Set', new_hydra_asset_path(:content_type=>'bag_aggregator') %>
     </li>
     <li>
-      <%= link_to 'Add an Item', new_asset_path(:content_type=>'content_aggregator') %>
+      <%= link_to 'Add an Item', new_hydra_asset_path(:content_type=>'content_aggregator') %>
     </li>
     <li>
-      <%= link_to 'Add an Image', new_asset_path(:content_type=>'static_image_aggregator') %>
+      <%= link_to 'Add an Image', new_hydra_asset_path(:content_type=>'static_image_aggregator') %>
     </li>
   </ul>
 </div>
